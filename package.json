@@ -1,0 +1,18 @@
+{
+  "name": "announement_app",
+  "version": "1.0.0",
+  "description": "A specialized festival announcement application created for Ganesh Chaturthi (వినాయక చవితి) pandals and festival committees. It delivers realistic human voice announcements in Telugu for both **Male (మోహన్ - Mohan)** and **Female (శృతి - Shruti)** voices, reading devotees' donations in the form of **Money (నగదు)** and **Items (వస్తువులు)** with pandal loudspeaker echo effects and temple bell chimes.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
+  }
+}

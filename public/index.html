@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>శ్రీ వినాయక చవితి చందా & విరాళాల మైక్ అనౌన్స్‌మెంట్ | Vinayaka Donation Announcer</title>
+  <meta name="description" content="వినాయక చవితి మండపాల కొరకు సహజమైన తెలుగు మానవ స్వరంతో (మోహన్ & శృతి) నగదు మరియు వస్తు రూప విరాళాల మైక్ అనౌన్స్‌మెంట్ ఆండ్రాయిడ్ యాప్.">
+  <meta name="theme-color" content="#D84315">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/png" href="/assets/icon.png">
+  <link rel="apple-touch-icon" href="/assets/icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css?v=5">
+</head>
+<body>
+
+  <!-- Divine Startup Splash Screen -->
+  <div id="startup-splash" class="startup-splash-overlay">
+    <div class="startup-splash-content">
+      <div class="startup-icon-wrap">
+        <img src="/assets/icon.png" alt="Vinayaka App Icon" class="startup-app-icon">
+        <div class="startup-glow-ring"></div>
+      </div>
+      <div class="startup-title-te">🕉️ శ్రీ వినాయక చవితి చందా & విరాళాల మైక్ అనౌన్స్‌మెంట్</div>
+      <div class="startup-title-en">Vinayaka Pandal Mic Announcer v2.1</div>
+      <div class="startup-slokam">"వక్రతుండ మహాకాయ సూర్యకోటి సమప్రభ... నిర్విఘ్నం కురు మే దేవ సర్వకార్యేషు సర్వదా"</div>
+      
+      <!-- Startup Progress Bar & Loading Indicator -->
+      <div class="startup-loader-container">
+        <div class="startup-loader-bar" id="startup-progress-bar"></div>
+      </div>
+      <div class="startup-status-text" id="startup-status-text">మండప మైక్ వ్యవస్థ సిద్ధమవుతోంది...</div>
+      
+      <button type="button" class="startup-skip-btn" id="btn-skip-splash">ప్రారంభించండి ➔</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- Festive Header -->
+    <header class="app-header">
+      <div class="header-branding">
+        <img src="/assets/icon.png" alt="Vinayaka Announcer Icon" class="header-icon" id="app-logo">
+        <div class="header-titles">
+          <h1>శ్రీ వినాయక చవితి విరాళాల ప్రకటన <span style="background: #E64A19; color: #FFF; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; vertical-align: middle;">v2.1</span></h1>
+          <div class="app-subtitle">Vinayaka Pandal Donation Mic Announcer (Android)</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-header" id="btn-toggle-translit" title="ఆంగ్లంలో టైప్ చేస్తే తెలుగులోకి మార్చండి">
+          🔤 EN ➔ తె: <span id="translit-status" style="color:#00E676;">ON</span>
+        </button>
+        <button class="btn-header" id="btn-open-template-modal" title="మైక్ ప్రకటన పాఠం సవరించండి">
+          📝 ప్రకటన పాఠం
+        </button>
+        <div id="header-sync-pill" class="header-sync-pill" title="రియల్-టైమ్ మల్టీ-మొబైల్ సింక్ స్థితి">
+          🟢 లైవ్ సింక్
+        </div>
+        <button class="btn-header" id="btn-open-mobile-connect" title="మల్టీ-మొబైల్ సింక్ & QR కోడ్">
+          📱 మొబైల్ సింక్
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats Overview -->
+    <section class="stats-grid">
+      <div class="stat-box highlight-cash">
+        <span class="stat-label">మొత్తం నగదు చందాలు</span>
+        <span class="stat-value" id="stat-total-cash">₹0</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">మొత్తం భక్తులు</span>
+        <span class="stat-value" id="stat-total-donors">0</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">వస్తు రూప విరాళాలు</span>
+        <span class="stat-value" id="stat-total-items">0</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">ఇంకా చదవాల్సినవి</span>
+        <span class="stat-value" id="stat-pending-count">0</span>
+      </div>
+    </section>
+
+    <!-- Master Announcement Broadcast Deck -->
+    <section class="broadcast-deck">
+      <div class="broadcast-controls">
+        <button class="btn-broadcast-primary" id="btn-play-all">
+          <span>📢</span> అన్ని విరాళాలు వరుసగా చదవండి
+        </button>
+        <button class="btn-broadcast-secondary" id="btn-pause-all" style="display: none;">
+          ⏸️ విరామం (Pause)
+        </button>
+        <button class="btn-broadcast-secondary" id="btn-next-devotee" style="display: none;">
+          ⏭️ తర్వాతి భక్తుడు
+        </button>
+        <button class="btn-broadcast-secondary" id="btn-stop-all" style="display: none;">
+          ⏹️ ఆపండి (Stop)
+        </button>
+
+        <label class="checkbox-unread-wrap" title="ఇంకా చదవని వారిని మాత్రమే మైక్ లో ప్రకటించండి">
+          <input type="checkbox" id="check-only-unread">
+          <span>కేవలం చదవనివి మాత్రమే</span>
+        </label>
+      </div>
+
+      <!-- Live Speaking Status Banner -->
+      <div class="queue-status-banner" id="queue-status-banner">
+        <div class="live-speaker-header">
+          <div class="speaker-title-wrap">
+            <div class="wave-anim" id="live-wave-anim">
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+            </div>
+            <h4 id="live-speaker-name">మైక్ ప్రకటన ప్రారంభమవుతోంది...</h4>
+          </div>
+          <span class="countdown-badge" id="countdown-badge"></span>
+        </div>
+        <div class="live-speaker-text" id="live-speaker-text">...</div>
+      </div>
+    </section>
+
+    <!-- Audio & Voice Settings Deck -->
+    <section class="settings-deck">
+      <div class="deck-title">
+        <span>🎙️ మైక్ & తెలుగు స్వరం సెట్టింగ్స్ (Realistic Human Voices)</span>
+      </div>
+
+      <!-- Dual Human Voice Selection -->
+      <div class="voice-switch-row">
+        <label class="voice-radio-label">
+          <input type="radio" name="voiceSelect" id="voice-mohan" value="te-IN-MohanNeural" checked>
+          <span>👨 మోహన్ (పురుష స్వరం - Mohan Male)</span>
+        </label>
+        <label class="voice-radio-label">
+          <input type="radio" name="voiceSelect" id="voice-shruti" value="te-IN-ShrutiNeural">
+          <span>👩 శృతి (స్త్రీ స్వరం - Shruti Female)</span>
+        </label>
+      </div>
+
+      <!-- Pandal Audio Toggles -->
+      <div class="audio-toggles-grid">
+        <label class="toggle-card">
+          <input type="checkbox" id="toggle-echo" checked>
+          <span>📢 మైక్ ఎకో (PA Reverb)</span>
+        </label>
+        <label class="toggle-card">
+          <input type="checkbox" id="toggle-bell" checked>
+          <span>🔔 ప్రారంభ గంట ధ్వని</span>
+        </label>
+        <label class="toggle-card">
+          <input type="checkbox" id="toggle-shankh">
+          <span>🐚 శంఖ నాదం</span>
+        </label>
+        <label class="toggle-card">
+          <input type="checkbox" id="toggle-bgm">
+          <span>🎵 నేపథ్య భక్తి నాదం</span>
+        </label>
+      </div>
+
+      <!-- Sliders and Templates -->
+      <div class="sliders-row">
+        <div class="slider-group">
+          <span>వేగం:</span>
+          <input type="range" id="rate-slider" min="-20" max="30" step="5" value="0">
+          <span id="rate-value">+0%</span>
+        </div>
+
+        <div class="slider-group">
+          <span>శైలి:</span>
+          <select id="select-template" class="form-select" style="padding: 4px 8px; font-size: 0.78rem;">
+            <option value="traditional">సాంప్రదాయ మైక్ శైలి</option>
+            <option value="quick">శీఘ్ర జాబితా శైలి</option>
+            <option value="celebration">మహోత్సవ / లడ్డూ శైలి</option>
+          </select>
+        </div>
+
+        <div class="test-audio-buttons">
+          <button class="btn-sound-test" id="btn-test-bell">🔔 గంట</button>
+          <button class="btn-sound-test" id="btn-test-shankh">🐚 శంఖం</button>
+          <button class="btn-sound-test" id="btn-test-voice">🎙️ స్వరం టెస్ట్</button>
+        </div>
+      </div>
+
+      <!-- Server Connection IP for Mobile APK -->
+      <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255, 179, 0, 0.2); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 260px;">
+          <span style="font-size: 0.78rem; color: var(--color-text-muted); white-space: nowrap;">🌐 సర్వర్ IP (Wi-Fi):</span>
+          <input type="text" id="input-server-url" class="form-input" style="padding: 4px 8px; font-size: 0.8rem; height: 32px;" placeholder="http://192.168.0.105:8080">
+          <button type="button" class="btn-sound-test" id="btn-save-server-url" style="white-space: nowrap;">💾 సేవ్</button>
+        </div>
+        <span id="server-status-pill" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; background: rgba(0, 230, 118, 0.15); color: #00E676;">కనెక్ట్ అయింది</span>
+      </div>
+    </section>
+
+    <!-- Search & Filter Deck -->
+    <section class="filter-search-deck">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" class="search-input" placeholder="భక్తుని పేరు, గ్రామం లేదా వస్తువుతో వెతకండి...">
+      </div>
+
+      <div class="filter-tabs-row">
+        <button class="filter-tab active" data-filter="all">అన్నీ (All)</button>
+        <button class="filter-tab" data-filter="money">💰 నగదు విరాళాలు</button>
+        <button class="filter-tab" data-filter="item">🎁 వస్తు రూపం</button>
+        <button class="filter-tab" data-filter="unread">⏳ ఇంకా చదవనివి</button>
+        <button class="filter-tab" data-filter="read">✅ చదివినవి</button>
+      </div>
+
+      <!-- Bulk Actions & Import Toolbar Row -->
+      <div class="bulk-toolbar-row">
+        <div class="bulk-toolbar-actions">
+          <button type="button" class="btn-bulk-tool" id="btn-open-bulk-import">
+            📋 బల్క్ నమోదు (Bulk Add)
+          </button>
+          <button type="button" class="btn-bulk-tool" id="btn-toggle-select-mode">
+            ☑️ ఎంపిక మోడ్ (Select)
+          </button>
+          <button type="button" class="btn-bulk-tool" id="btn-export-csv">
+            📊 ఎక్సెల్ / CSV ఎగుమతి
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Floating / Sticky Multi-Select Bulk Actions Bar -->
+    <div class="bulk-floating-bar" id="bulk-actions-toolbar">
+      <div class="bulk-status-badge">
+        <span id="bulk-selected-count">0</span> ఎంపికయ్యాయి
+      </div>
+      <div class="bulk-action-buttons">
+        <button type="button" class="btn-bulk-act" id="btn-bulk-select-all">అన్నీ ఎంచుకో</button>
+        <button type="button" class="btn-bulk-act" id="btn-bulk-mark-read">✓ చదివారు</button>
+        <button type="button" class="btn-bulk-act" id="btn-bulk-mark-unread">○ చదవలేదు</button>
+        <button type="button" class="btn-bulk-act highlight" id="btn-bulk-open-update-modal">✏️ బల్క్ అప్‌డేట్</button>
+        <button type="button" class="btn-bulk-act danger" id="btn-bulk-delete">🗑️ తొలగించు</button>
+        <button type="button" class="btn-bulk-act" id="btn-bulk-cancel">❌ రద్దు</button>
+      </div>
+    </div>
+
+    <!-- Devotees Donation Cards List -->
+    <main class="devotees-list" id="devotees-list">
+      <!-- Injected dynamically via app.js -->
+    </main>
+
+  </div>
+
+  <!-- Floating Action Button (+ New Donation) -->
+  <button class="fab-add-btn" id="btn-open-add-modal">
+    <span>➕</span> కొత్త విరాళం
+  </button>
+
+  <!-- Add / Edit Donation Modal -->
+  <div class="modal-overlay" id="donation-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">కొత్త విరాళం నమోదు చేయండి</h3>
+        <button class="btn-modal-close" id="btn-close-modal">&times;</button>
+      </div>
+      <form id="donation-form">
+        <div class="modal-body">
+          <!-- Donation Type Switch -->
+          <div class="type-switch-group">
+            <label class="type-radio-box">
+              <input type="radio" name="donationType" id="type-money" value="money" checked>
+              <span>💰 నగదు (Cash)</span>
+            </label>
+            <label class="type-radio-box">
+              <input type="radio" name="donationType" id="type-item" value="item">
+              <span>🎁 వస్తువు (Item)</span>
+            </label>
+            <label class="type-radio-box">
+              <input type="radio" name="donationType" id="type-both" value="both">
+              <span>🤝 రెండూ (Both)</span>
+            </label>
+          </div>
+
+          <!-- Devotee Name -->
+          <div class="form-group">
+            <label class="form-label" for="input-name">భక్తుని పేరు / కుటుంబ సభ్యులు *</label>
+            <input type="text" id="input-name" class="form-input" placeholder="ఉదా: శ్రీ కొండపల్లి రాము గారు" required>
+          </div>
+
+          <!-- Place / Gothram -->
+          <div class="form-group">
+            <label class="form-label" for="input-place">ఊరు / కాలనీ / వీధి</label>
+            <input type="text" id="input-place" class="form-input" placeholder="ఉదా: గాంధీ నగర్">
+          </div>
+
+          <!-- Money Amount (Conditional) -->
+          <div class="form-group" id="group-money">
+            <label class="form-label" for="input-amount">విరాళం మొత్తం (రూపాయలలో ₹) *</label>
+            <input type="number" id="input-amount" class="form-input" placeholder="ఉదా: 1116" min="1">
+            <div class="preset-pills">
+              <button type="button" class="preset-btn" data-amount="116">₹116</button>
+              <button type="button" class="preset-btn" data-amount="516">₹516</button>
+              <button type="button" class="preset-btn" data-amount="1116">₹1,116</button>
+              <button type="button" class="preset-btn" data-amount="2500">₹2,500</button>
+              <button type="button" class="preset-btn" data-amount="5116">₹5,116</button>
+              <button type="button" class="preset-btn" data-amount="10001">₹10,001</button>
+              <button type="button" class="preset-btn" data-amount="25000">₹25,000</button>
+              <button type="button" class="preset-btn" data-amount="50000">₹50,000</button>
+            </div>
+          </div>
+
+          <!-- Item Details (Conditional) -->
+          <div class="form-group" id="group-item" style="display: none;">
+            <label class="form-label" for="input-item">వస్తువు వివరాలు *</label>
+            <input type="text" id="input-item" class="form-input" placeholder="ఉదా: 21 కిలోల నెయ్యి లడ్డూ">
+            <div class="preset-pills">
+              <button type="button" class="preset-btn" data-item="5 కిలోల నెయ్యి లడ్డూ" data-qty="5 KG">5kg లడ్డూ</button>
+              <button type="button" class="preset-btn" data-item="21 కిలోల నెయ్యి లడ్డూ" data-qty="21 KG">21kg లడ్డూ</button>
+              <button type="button" class="preset-btn" data-item="25 కేజీల శ్రీరామ్ బియ్యం బస్తా" data-qty="1 బస్తా">25kg బియ్యం</button>
+              <button type="button" class="preset-btn" data-item="స్వామివారి పట్టు పీతాంబరాలు" data-qty="1 జత">పట్టు వస్త్రాలు</button>
+              <button type="button" class="preset-btn" data-item="స్వామివారి దివ్య వెండి ఛత్రం" data-qty="1 గొడుగు">వెండి గొడుగు</button>
+              <button type="button" class="preset-btn" data-item="స్వామివారి పూజా ద్రవ్యాలు & పండ్లు" data-qty="">పూజా సామగ్రి</button>
+            </div>
+
+            <div style="margin-top: 10px;">
+              <label class="form-label" for="input-item-qty">పరిమాణం / కొలత (ఐచ్ఛికం)</label>
+              <input type="text" id="input-item-qty" class="form-input" placeholder="ఉదా: 1 బస్తా, 21 కేజీలు">
+            </div>
+          </div>
+
+          <!-- Purpose / Occasion -->
+          <div class="form-group">
+            <label class="form-label" for="input-purpose">సందర్భం / ఉద్దేశం</label>
+            <input type="text" id="input-purpose" class="form-input" placeholder="ఉదా: నిత్య అన్నదానం కొరకు">
+            <div class="preset-pills">
+              <button type="button" class="preset-btn" onclick="document.getElementById('input-purpose').value='నిత్య అన్నదానం కొరకు'; updateModalPreview();">అన్నదానం</button>
+              <button type="button" class="preset-btn" onclick="document.getElementById('input-purpose').value='స్వామివారి లడ్డూ ప్రసాదం నిమిత్తం'; updateModalPreview();">లడ్డూ ప్రసాదం</button>
+              <button type="button" class="preset-btn" onclick="document.getElementById('input-purpose').value='మండప అలంకరణ మరియు నిర్వహణ కొరకు'; updateModalPreview();">మండప ఖర్చులు</button>
+              <button type="button" class="preset-btn" onclick="document.getElementById('input-purpose').value='నిమజ్జన మహోత్సవం కొరకు'; updateModalPreview();">నిమజ్జనం</button>
+            </div>
+          </div>
+
+          <!-- Editable Announcement Matter for this Devotee -->
+          <div class="form-group" style="margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label class="form-label" for="input-custom-script" style="color: var(--color-gold); font-weight: 700; margin-bottom: 0;">
+                📢 మైక్ లో చదవాల్సిన పాఠం (Announcement Matter) *
+              </label>
+              <button type="button" class="preset-btn" id="btn-regenerate-script" title="వివరాల ఆధారంగా మళ్ళీ రూపొందించండి">↺ ఆటో-రీసెట్</button>
+            </div>
+            <textarea id="input-custom-script" class="form-input" rows="4" style="font-size: 0.86rem; line-height: 1.5; color: #FFF9C4; border: 1.5px solid var(--color-gold); background: rgba(0,0,0,0.5);" placeholder="మైక్ లో ప్రకటించాల్సిన పూర్తి పాఠం ఇక్కడ వస్తుంది... దీన్ని మీరు నేరుగా మార్చుకోవచ్చు."></textarea>
+            <span style="font-size: 0.72rem; color: var(--color-text-subtle); display: block; margin-top: 4px;">
+              💡 మైక్ లో ఈ భక్తునికి ఖచ్చితంగా ఇక్కడ ఉన్న పాఠమే చదవబడుతుంది. మీరు అవసరమైన విధంగా మార్పులు చేసుకోవచ్చు.
+            </span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="btn-cancel-modal" onclick="document.getElementById('donation-modal').classList.remove('active')">రద్దు చేయండి</button>
+          <button type="submit" class="btn-primary" id="btn-save-donation">భద్రపరచండి</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Master Announcement Template Modal (ప్రకటన పాఠం సెట్ చేయండి) -->
+  <div class="modal-overlay" id="template-settings-modal">
+    <div class="modal-content" style="max-width: 560px;">
+      <div class="modal-header">
+        <h3>📝 ప్రధాన మైక్ ప్రకటన పాఠం (Master Template)</h3>
+        <button class="btn-modal-close" id="btn-close-template-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.82rem; color: var(--color-text-muted); margin-bottom: 10px;">
+          అన్ని విరాళాల కొరకు మైక్ లో చదవాల్సిన ప్రధాన వాక్య శైలిని ఇక్కడ సెట్ చేయండి. క్రింది టాగ్ ల స్థానంలో భక్తుల వివరాలు స్వయంచాలకంగా వస్తాయి:
+        </p>
+
+        <div style="margin-bottom: 10px;">
+          <span style="font-size: 0.75rem; color: var(--color-gold); font-weight: 700;">టాగ్ లు (జోడించడానికి క్లిక్ చేయండి):</span>
+          <div class="preset-pills" style="margin-top: 4px;">
+            <button type="button" class="preset-btn btn-insert-tag" data-tag="{పేరు}">{పేరు}</button>
+            <button type="button" class="preset-btn btn-insert-tag" data-tag="{ఊరు}">{ఊరు}</button>
+            <button type="button" class="preset-btn btn-insert-tag" data-tag="{గోత్రం}">{గోత్రం}</button>
+            <button type="button" class="preset-btn btn-insert-tag" data-tag="{విరాళం}">{విరాళం}</button>
+            <button type="button" class="preset-btn btn-insert-tag" data-tag="{సందర్భం}">{సందర్భం}</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <textarea id="input-master-template" class="form-input" rows="5" style="font-size: 0.88rem; line-height: 1.6; color: #FFF8E1; border: 1.5px solid var(--color-gold);"></textarea>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <span style="font-size: 0.75rem; color: var(--color-text-subtle);">సిద్ధంగా ఉన్న శైలులు:</span>
+          <div class="preset-pills" style="margin-top: 4px;">
+            <button type="button" class="preset-btn" id="tpl-btn-trad">సాంప్రదాయ దీర్ఘ శైలి</button>
+            <button type="button" class="preset-btn" id="tpl-btn-quick">శీఘ్ర మైక్ శైలి</button>
+            <button type="button" class="preset-btn" id="tpl-btn-celeb">లడ్డూ వేలం / మహోత్సవ శైలి</button>
+          </div>
+        </div>
+
+        <div class="preview-box">
+          <strong style="color: var(--color-gold);">నమూనా మైక్ ప్రకటన ప్రివ్యూ:</strong>
+          <p id="preview-master-template-text" style="margin-top: 4px;">...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btn-reset-master-template">డిఫాల్ట్ కి రీసెట్</button>
+        <button type="button" class="btn-primary" id="btn-save-master-template">పాఠం సేవ్ చేయండి</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Update Modal (బల్క్ అప్‌డేట్) -->
+  <div class="modal-overlay" id="bulk-update-modal">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <div>
+          <h3>✏️ బల్క్ అప్‌డేట్ (Bulk Update)</h3>
+          <p style="font-size: 0.78rem; color: var(--color-gold); margin-top: 2px;">
+            ఎంపిక చేసిన <strong id="bulk-update-count-label">0</strong> విరాళాలను ఒకేసారి సవరించండి
+          </p>
+        </div>
+        <button class="btn-modal-close" id="btn-close-bulk-update">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 12px;">
+          మీరు మార్చాలనుకుంటున్న వివరాల పక్కన టిక్ (✓) చేసి కొత్త వివరాలు నమోదు చేయండి:
+        </p>
+
+        <!-- 1. Status Update -->
+        <div class="bulk-field-group is-inactive" id="group-bulk-status">
+          <label class="bulk-field-toggle">
+            <input type="checkbox" id="check-bulk-status">
+            <span>చదివిన స్థితి మార్చండి (Update Status)</span>
+          </label>
+          <div class="bulk-field-content">
+            <select id="select-bulk-status" class="form-input">
+              <option value="read">✅ చదివినట్లుగా గుర్తించు (Mark as Announced / Read)</option>
+              <option value="unread">⏳ ఇంకా చదవలేదుగా మార్చు (Mark as Unread / Pending)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 2. Purpose Update -->
+        <div class="bulk-field-group is-inactive" id="group-bulk-purpose">
+          <label class="bulk-field-toggle">
+            <input type="checkbox" id="check-bulk-purpose">
+            <span>సందర్భం / ఉద్దేశ్యం మార్చండి (Update Purpose)</span>
+          </label>
+          <div class="bulk-field-content">
+            <div class="preset-pills" style="margin-bottom: 8px;">
+              <button type="button" class="preset-btn btn-bulk-purpose-preset" data-val="స్వామివారి నిత్య పూజ మరియు అన్నదానం">అన్నదానం</button>
+              <button type="button" class="preset-btn btn-bulk-purpose-preset" data-val="గణపతి లడ్డు ప్రసాదం వేలం">లడ్డు వేలం</button>
+              <button type="button" class="preset-btn btn-bulk-purpose-preset" data-val="మండపం మరియు విగ్రహం అలంకరణ">మండపం</button>
+              <button type="button" class="preset-btn btn-bulk-purpose-preset" data-val="గణపతి నిమజ్జన మహోత్సవం">నిమజ్జనం</button>
+            </div>
+            <input type="text" id="input-bulk-purpose" class="form-input" placeholder="ఉదా: అన్నదానం కొరకు (ఇంగ్లీష్ టైప్ చేస్తే తెలుగులోకి మారుతుంది)">
+          </div>
+        </div>
+
+        <!-- 3. Place Update -->
+        <div class="bulk-field-group is-inactive" id="group-bulk-place">
+          <label class="bulk-field-toggle">
+            <input type="checkbox" id="check-bulk-place">
+            <span>ఊరు / కాలనీ పేరు మార్చండి (Update Place)</span>
+          </label>
+          <div class="bulk-field-content">
+            <input type="text" id="input-bulk-place" class="form-input" placeholder="ఉదా: గాంధీ నగర్ లేదా హైదరాబాద్">
+          </div>
+        </div>
+
+        <!-- 4. Amount Update -->
+        <div class="bulk-field-group is-inactive" id="group-bulk-amount">
+          <label class="bulk-field-toggle">
+            <input type="checkbox" id="check-bulk-amount">
+            <span>నగదు మొత్తం మార్చండి (Update Amount)</span>
+          </label>
+          <div class="bulk-field-content">
+            <div class="preset-pills" style="margin-bottom: 8px;">
+              <button type="button" class="preset-btn btn-bulk-amount-preset" data-val="516">₹516</button>
+              <button type="button" class="preset-btn btn-bulk-amount-preset" data-val="1116">₹1,116</button>
+              <button type="button" class="preset-btn btn-bulk-amount-preset" data-val="2116">₹2,116</button>
+              <button type="button" class="preset-btn btn-bulk-amount-preset" data-val="5116">₹5,116</button>
+              <button type="button" class="preset-btn btn-bulk-amount-preset" data-val="10116">₹10,116</button>
+            </div>
+            <input type="number" id="input-bulk-amount" class="form-input" placeholder="రూపాయలు (ఉదా: 5116)">
+          </div>
+        </div>
+
+        <!-- 5. Announcement Matter (మైక్ ప్రకటన పాఠం) Update -->
+        <div class="bulk-field-group is-inactive" id="group-bulk-matter">
+          <label class="bulk-field-toggle">
+            <input type="checkbox" id="check-bulk-matter">
+            <span>మైక్ ప్రకటన పాఠం ఫీడ్ చేయండి (Feed Announcement Matter)</span>
+          </label>
+          <div class="bulk-field-content">
+            <div style="margin-bottom: 6px;">
+              <span style="font-size: 0.75rem; color: var(--color-gold); font-weight: 700;">టాగ్ లు (క్లిక్ చేసి జోడించండి):</span>
+              <div class="preset-pills" style="margin-top: 4px;">
+                <button type="button" class="preset-btn btn-bulk-matter-tag" data-tag="{పేరు}">{పేరు}</button>
+                <button type="button" class="preset-btn btn-bulk-matter-tag" data-tag="{ఊరు}">{ఊరు}</button>
+                <button type="button" class="preset-btn btn-bulk-matter-tag" data-tag="{గోత్రం}">{గోత్రం}</button>
+                <button type="button" class="preset-btn btn-bulk-matter-tag" data-tag="{విరాళం}">{విరాళం}</button>
+                <button type="button" class="preset-btn btn-bulk-matter-tag" data-tag="{సందర్భం}">{సందర్భం}</button>
+              </div>
+            </div>
+            <div class="preset-pills" style="margin-bottom: 8px;">
+              <button type="button" class="preset-btn" id="bulk-tpl-trad">సాంప్రదాయ దీర్ఘ శైలి</button>
+              <button type="button" class="preset-btn" id="bulk-tpl-quick">శీఘ్ర మైక్ శైలి</button>
+              <button type="button" class="preset-btn" id="bulk-tpl-laddu">లడ్డు వేలం శైలి</button>
+              <button type="button" class="preset-btn" id="bulk-tpl-annadanam">అన్నదానం శైలి</button>
+            </div>
+            <textarea id="input-bulk-matter" class="form-input" rows="4" placeholder="ఉదా: శ్రీ వినాయక స్వామి వారి కృపాకటాక్షాలతో... {ఊరు} నివాసి శ్రీ {పేరు} గారు, స్వామివారి {సందర్భం} నిమిత్తం {విరాళం} భక్తిశ్రద్ధలతో సమర్పించుకున్నారు. బోలో గణపతి బప్పా మోరియా!" style="font-size: 0.85rem; line-height: 1.5; border: 1.5px solid var(--color-gold);"></textarea>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btn-cancel-bulk-update">రద్దు</button>
+        <button type="button" class="btn-primary" id="btn-apply-bulk-update">💾 అప్‌డేట్ చేయండి</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Add / Import Modal (బల్క్ నమోదు) -->
+  <div class="modal-overlay" id="bulk-import-modal">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <h3>📋 బల్క్ నమోదు (Bulk Add / Import)</h3>
+          <p style="font-size: 0.78rem; color: var(--color-gold); margin-top: 2px;">
+            ఎక్సెల్ నుండి లేదా లిస్ట్ రూపంలో విరాళాలు & మైక్ ప్రకటన పాఠాన్ని ఒకేసారి చేర్చండి
+          </p>
+        </div>
+        <button class="btn-modal-close" id="btn-close-bulk-import">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(255, 179, 0, 0.08); border-left: 3px solid var(--color-gold); padding: 8px 12px; margin-bottom: 12px; font-size: 0.78rem; color: var(--color-text-main);">
+          <strong>💡 ప్రతి లైన్ లో ఈ విధంగా నమోదు చేయవచ్చు:</strong><br>
+          <code>భక్తుని పేరు, ఊరు, విరాళం, సందర్భం, మైక్ ప్రకటన పాఠం (ఐచ్ఛికం)</code><br>
+          ఉదాహరణ: <em>రమేష్, కాకినాడ, 5116, అన్నదానం, శ్రీ రమేష్ గారు అన్నదానం కొరకు 5116 సమర్పించారు</em>
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--color-gold);">విరాళాల జాబితా & ప్రకటన పాఠం పేస్ట్ చేయండి:</label>
+            <button type="button" class="btn-secondary" id="btn-fill-sample-bulk" style="padding: 2px 8px; font-size: 0.72rem;">నమూనా డేటా నింపు</button>
+          </div>
+          <textarea id="bulk-import-text" class="form-input" rows="6" placeholder="రాము, విజయవాడ, 5116, అన్నదానం, శ్రీ రాము గారు విజయవాడ నుండి అన్నదానం కొరకు 5116 రూపాయలు సమర్పించారు.&#10;సురేష్, హైదరాబాద్, 10116, లడ్డు వేలం, లడ్డు ప్రసాదం వేలంలో సురేష్ బాబు గారు 10116 రూపాయలు పాడారు.&#10;Venkatesh, Guntur, 2116, పూజ&#10;లక్ష్మి, తెనాలి, 2 బస్తాల బియ్యం, అన్నదానం" style="font-size: 0.82rem; font-family: monospace; line-height: 1.5;"></textarea>
+        </div>
+
+        <!-- Optional batch matter template -->
+        <div class="form-group" style="margin-top: 8px;">
+          <label style="font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted);">
+            ఈ బ్యాచ్ విరాళాల కొరకు ఉమ్మడి మైక్ ప్రకటన పాఠం (Batch Announcement Matter - ఐచ్ఛికం):
+          </label>
+          <input type="text" id="bulk-import-batch-matter" class="form-input" placeholder="ఖాళీగా ఉంచితే డిఫాల్ట్ మాస్టర్ పాఠం వస్తుంది (టాగ్ లు: {పేరు}, {ఊరు}, {విరాళం}, {సందర్భం})" style="font-size: 0.8rem;">
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0; flex-wrap: wrap; gap: 8px;">
+          <label style="font-size: 0.8rem; display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--color-gold);">
+            <input type="checkbox" id="check-bulk-translit-auto" checked style="accent-color: var(--color-gold);">
+            ఇంగ్లీష్ పేర్లను & పాఠాన్ని తెలుగులోకి మార్చు (Auto Transliterate)
+          </label>
+          <button type="button" class="btn-secondary" id="btn-parse-bulk" style="font-size: 0.8rem; padding: 6px 12px;">
+            🔍 ప్రివ్యూ చూడండి
+          </button>
+        </div>
+
+        <!-- Preview Section -->
+        <div id="bulk-preview-section" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <strong style="color: var(--color-gold); font-size: 0.82rem;">
+              గుర్తించబడిన విరాళాలు: <span id="bulk-parsed-count">0</span>
+            </strong>
+          </div>
+          <div class="parsed-table-wrap">
+            <table class="parsed-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>పేరు</th>
+                  <th>ఊరు</th>
+                  <th>విరాళం</th>
+                  <th>సందర్భం</th>
+                  <th>మైక్ ప్రకటన పాఠం (Matter)</th>
+                </tr>
+              </thead>
+              <tbody id="bulk-parsed-tbody">
+                <!-- Parsed rows injected -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btn-cancel-bulk-import">రద్దు</button>
+        <button type="button" class="btn-primary" id="btn-save-bulk-import" disabled>
+          💾 అన్నీ జోడించండి (<span id="bulk-save-count">0</span>)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Multi-Mobile Real-time Sync & Connect Modal -->
+  <div class="modal-overlay" id="mobile-connect-modal">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3>📱 మల్టీ-మొబైల్ రియల్-టైమ్ సింక్ (Multi-Mobile Sync)</h3>
+        <button class="btn-modal-close" id="btn-close-mobile-connect">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        
+        <!-- Top Live Sync Status Bar -->
+        <div style="background: rgba(0, 230, 118, 0.08); border: 1px solid rgba(0, 230, 118, 0.3); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <div id="modal-sync-status" style="font-weight: 700; color: #00E676; font-size: 0.85rem;">
+              🟢 లైవ్ సింక్ సక్రియం (ప్రతి 4 సెకన్లకు ఆటో-సింక్)
+            </div>
+            <div id="modal-sync-time" style="font-size: 0.72rem; color: var(--color-text-muted); margin-top: 2px;">
+              చివరి సింక్: ఇప్పుడే
+            </div>
+          </div>
+          <button type="button" class="btn-sound-test" id="btn-manual-sync-now" style="font-size: 0.78rem; padding: 5px 12px; white-space: nowrap;">
+            🔄 ఇప్పుడే సింక్ చేయండి
+          </button>
+        </div>
+
+        <!-- Sync Tabs Navigation -->
+        <div class="sync-tab-nav">
+          <button type="button" class="sync-tab-btn active" data-tab="tab-sync-wifi">📶 పందిరి Wi-Fi / హాట్‌స్పాట్</button>
+          <button type="button" class="sync-tab-btn" data-tab="tab-sync-cloud">🌐 క్లౌడ్ / 4G ఇంటర్నెట్</button>
+          <button type="button" class="sync-tab-btn" data-tab="tab-sync-offline">💬 WhatsApp / ఆఫ్‌లైన్</button>
+        </div>
+
+        <!-- Tab 1: Pandal Wi-Fi / Hotspot Sync -->
+        <div class="sync-tab-pane active" id="tab-sync-wifi">
+          <p style="font-size: 0.82rem; color: var(--color-text-muted); margin-bottom: 12px; text-align: center;">
+            మీ పందిరి కమిటీ ఫోన్ల కెమెరా లేదా Google Lens తో ఈ QR కోడ్ ను స్కాన్ చేయండి:
+          </p>
+
+          <div id="qr-code-display" style="display: flex; justify-content: center; margin-bottom: 12px;">
+            <!-- QR code image injected dynamically -->
+          </div>
+
+          <div style="background: rgba(0,0,0,0.45); padding: 10px 12px; border-radius: 8px; border: 1px dashed var(--color-gold); display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px;">
+            <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <span style="font-size: 0.72rem; color: var(--color-text-subtle); display: block;">ఫోన్ బ్రౌజర్‌లో ఓపెన్ చేయడానికి లింక్:</span>
+              <span id="mobile-ip-address" style="font-weight: 700; color: var(--color-gold-bright); font-family: monospace; font-size: 0.95rem;">
+                http://...
+              </span>
+            </div>
+            <button type="button" class="btn-sound-test" id="btn-copy-sync-url" style="white-space: nowrap; padding: 4px 10px; font-size: 0.75rem;">📋 కాపీ</button>
+          </div>
+
+          <div class="sync-info-box">
+            <strong>💡 బహుళ ఫోన్లలో సింక్ ఎలా పనిచేస్తుంది:</strong><br>
+            <span class="sync-step-num">1</span> <strong>ఒకే నెట్‌వర్క్</strong>: కౌంటర్‌లోని అన్ని ఫోన్లను పందిరి Wi-Fi లేదా ల్యాప్‌టాప్/మొబైల్ హాట్‌స్పాట్‌కు కనెక్ట్ చేయండి.<br>
+            <span class="sync-step-num">2</span> <strong>రియల్-టైమ్ అప్‌డేట్</strong>: ఏ ఫోన్‌లో భక్తుని విరాళం నమోదు చేసినా, మిగతా అన్ని మొబైల్స్ మరియు మైక్ సిస్టమ్‌లో <strong>3-4 సెకన్లలో ఆటోమేటిక్‌గా</strong> కనిపిస్తుంది.<br>
+            <span class="sync-step-num">3</span> <strong>నో డేటా లాస్</strong>: స్మార్ట్ 2-వే మెర్జ్ ఉండటం వల్ల ఇద్దరు వాలంటీర్లు ఒకేసారి నమోదు చేసినా ఏ విరాళమూ పోదు!
+          </div>
+        </div>
+
+        <!-- Tab 2: Cloud / 4G Internet Sync -->
+        <div class="sync-tab-pane" id="tab-sync-cloud">
+          <div class="sync-info-box">
+            <strong>🌐 కాలనీలో తిరుగుతూ 4G/5G ద్వారా చందాలు వసూలు చేసే వాలంటీర్ల కోసం:</strong><br>
+            వాలంటీర్లు పందిరి Wi-Fi పరిధి దాటి వీధుల్లో చందాలు సేకరిస్తున్నప్పుడు కూడా పందిరి మైక్ సిస్టమ్‌తో సింక్ అవ్వవచ్చు.<br><br>
+            <strong>ఎలా సెటప్ చేయాలి:</strong><br>
+            • పందిరి ల్యాప్‌టాప్‌లో ఉచిత టన్నెల్ రన్ చేయండి (ఉదా: <code>npx localtunnel --port 8080</code> లేదా <code>cloudflared</code>).<br>
+            • అక్కడ వచ్చిన పబ్లిక్ HTTPS లింక్‌ను కింద పేస్ట్ చేసి <strong>సేవ్</strong> చేయండి:
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <input type="text" id="input-sync-cloud-url" class="form-input" placeholder="https://vinayaka-pandal.loca.lt" style="flex: 1; font-size: 0.82rem;">
+            <button type="button" class="btn-primary" id="btn-save-cloud-url" style="white-space: nowrap; padding: 6px 14px; font-size: 0.82rem;">💾 కనెక్ట్</button>
+          </div>
+          <div style="font-size: 0.74rem; color: var(--color-text-muted);">
+            ఈ లింక్ ద్వారా ప్రపంచంలో ఎక్కడి నుంచైనా మొబైల్ డేటాతో కమిటీ సభ్యులు చందాలు నమోదు చేయవచ్చు.
+          </div>
+        </div>
+
+        <!-- Tab 3: WhatsApp / Offline Sync -->
+        <div class="sync-tab-pane" id="tab-sync-offline">
+          <div class="sync-info-box">
+            <strong>💬 పందిరిలో ల్యాప్‌టాప్ లేకుండా కేవలం ఫోన్లతోనే ఉపయోగించే విధానం:</strong><br>
+            • <strong>వాలంటీర్ ఫోన్</strong>: వీధుల్లో లేదా కౌంటర్‌లో చందాలు రాసే వాలంటీర్లు సాధారణంగానే తమ ఫోన్‌లో నమోదు చేస్తారు.<br>
+            • <strong>షేరింగ్</strong>: కింద ఉన్న <strong>"📲 WhatsApp ద్వారా పంపండి"</strong> బటన్ నొక్కగానే పందిరి మైక్ ఆపరేటర్ ఫోన్‌కు ఫైల్ వెళ్ళిపోతుంది.<br>
+            • <strong>మైక్ ఫోన్</strong>: మైక్ ఆపరేటర్ <strong>"📥 దిగుమతి & మెర్జ్"</strong> నొక్కగానే అన్ని చందాలు క్షణాల్లో మైక్ లిస్ట్‌లోకి వచ్చి అనౌన్స్‌మెంట్‌కు సిద్ధమవుతాయి!
+          </div>
+
+          <div style="display: flex; gap: 10px; flex-direction: column; margin-top: 14px;">
+            <button type="button" class="btn-primary" id="btn-share-whatsapp-sync" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px; background: linear-gradient(135deg, #25D366, #128C7E); color: #FFF; font-weight: 700;">
+              📲 WhatsApp లో నేరుగా పంపండి (Direct Share)
+            </button>
+            <button type="button" class="btn-secondary" id="btn-export-json-sync" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px;">
+              📤 బ్యాకప్ ఫైల్ డౌన్‌లోడ్ (Export JSON)
+            </button>
+            <button type="button" class="btn-secondary" id="btn-trigger-import-json" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-color: var(--color-gold);">
+              📥 ఫైల్ నుండి విరాళాలు దిగుమతి & మెర్జ్ (Import JSON)
+            </button>
+            <input type="file" id="input-file-import-json" accept=".json" style="display: none;">
+          </div>
+          <div style="font-size: 0.72rem; color: var(--color-text-subtle); margin-top: 8px; text-align: center;">
+            దిగుమతి చేసినప్పుడు ఉన్న విరాళాలు చెరిగిపోకుండా కొత్తవి సురక్షితంగా జతచేయబడతాయి.
+          </div>
+        </div>
+
+        <!-- Download APK Section -->
+        <div style="margin-top: 14px; text-align: left; background: rgba(255, 179, 0, 0.08); padding: 10px 14px; border-radius: 8px; font-size: 0.78rem; color: var(--color-text-main); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <strong>📱 ఆండ్రాయిడ్ యాప్ (APK v2.1):</strong><br>
+            <span style="color: var(--color-text-muted); font-size: 0.72rem;">ఫోన్లలో శాశ్వతంగా ఇన్‌స్టాల్ చేసుకోవడానికి</span>
+          </div>
+          <a href="/Vinayaka_Announcer_v2.apk" download class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 8px 14px; font-size: 0.82rem;">
+            ⬇️ APK డౌన్‌లోడ్
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Remote Donation Notification Toast -->
+  <div id="remote-sync-toast" class="remote-sync-toast">
+    <span style="font-size: 1.2rem;">🔔</span>
+    <span id="remote-sync-toast-text">మరో ఫోన్ నుండి కొత్త విరాళం నమోదయింది!</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/audio.js?v=9"></script>
+  <script src="/js/transliterate.js?v=9"></script>
+  <script src="/js/tts.js?v=9"></script>
+  <script src="/js/donations.js?v=9"></script>
+  <script src="/js/app.js?v=9"></script>
+</body>
+</html>

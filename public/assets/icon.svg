@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C0A02" />
+      <stop offset="40%" stop-color="#D84315" />
+      <stop offset="100%" stop-color="#BF360C" />
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#FFE082" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#FFB300" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#D84315" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF9C4" />
+      <stop offset="30%" stop-color="#FFD54F" />
+      <stop offset="70%" stop-color="#FFB300" />
+      <stop offset="100%" stop-color="#FF8F00" />
+    </linearGradient>
+    <linearGradient id="tilakGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF1744" />
+      <stop offset="100%" stop-color="#B71C1C" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Background circle/rounded rect -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  <circle cx="256" cy="240" r="220" fill="url(#sunGlow)" />
+
+  <!-- Outer Divine Halo / Garland Ring -->
+  <circle cx="256" cy="245" r="190" fill="none" stroke="url(#goldGrad)" stroke-width="6" stroke-dasharray="12 8" opacity="0.85" />
+  <circle cx="256" cy="245" r="175" fill="none" stroke="#FFD54F" stroke-width="2" opacity="0.5" />
+
+  <!-- Divine Ganesha Silhouette in Golden Shimmer -->
+  <g filter="url(#shadow)">
+    <!-- Crown / Mukut -->
+    <path d="M 216 110 L 256 50 L 296 110 L 280 145 L 232 145 Z" fill="url(#goldGrad)" stroke="#FFE082" stroke-width="2" />
+    <circle cx="256" cy="75" r="8" fill="#D50000" />
+    <circle cx="256" cy="115" r="12" fill="#D50000" />
+    <!-- Crown base band -->
+    <path d="M 200 145 Q 256 160 312 145 Q 312 165 256 175 Q 200 165 200 145 Z" fill="url(#goldGrad)" />
+
+    <!-- Left Ear (Organized divine swoop) -->
+    <path d="M 202 165 C 130 170 100 230 140 300 C 160 320 185 305 200 290" fill="none" stroke="url(#goldGrad)" stroke-width="18" stroke-linecap="round" />
+    
+    <!-- Right Ear -->
+    <path d="M 310 165 C 382 170 412 230 372 300 C 352 320 327 305 312 290" fill="none" stroke="url(#goldGrad)" stroke-width="18" stroke-linecap="round" />
+
+    <!-- Head Dome / Forehead -->
+    <path d="M 195 200 Q 256 170 317 200 Q 295 270 256 265 Q 217 270 195 200 Z" fill="url(#goldGrad)" />
+
+    <!-- Sacred Red Tilak / Namam on Forehead -->
+    <path d="M 246 175 Q 256 160 266 175 L 266 225 Q 256 240 246 225 Z" fill="url(#tilakGrad)" />
+    <circle cx="256" cy="210" r="5" fill="#FFD54F" />
+
+    <!-- Left Tusk (Broken - Ekadanta) -->
+    <path d="M 215 285 L 195 300 L 205 308 L 222 295 Z" fill="#FFFFFF" stroke="#FFE082" stroke-width="1" />
+    <!-- Right Tusk (Complete) -->
+    <path d="M 297 285 L 325 320 L 312 322 L 290 295 Z" fill="#FFFFFF" stroke="#FFE082" stroke-width="1" />
+
+    <!-- Trunk (Sinuous graceful curve turning to left with Modak) -->
+    <path d="M 245 260 C 270 280 280 340 265 375 C 250 410 205 410 185 385 C 170 365 185 345 205 350 C 215 353 220 365 215 375" 
+          fill="none" stroke="url(#goldGrad)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Golden Bell / Modak in Trunk / Hand -->
+    <circle cx="210" cy="355" r="16" fill="url(#goldGrad)" stroke="#FFE082" stroke-width="3" />
+    <circle cx="210" cy="355" r="7" fill="#E65100" />
+  </g>
+
+  <!-- Microphone / Soundwave Audio Accent at Bottom -->
+  <g transform="translate(196, 425)" filter="url(#shadow)">
+    <rect x="0" y="8" width="8" height="24" rx="4" fill="#FFD54F" />
+    <rect x="16" y="0" width="8" height="40" rx="4" fill="#FFE082" />
+    <rect x="32" y="12" width="8" height="16" rx="4" fill="#FFD54F" />
+    <rect x="48" y="4" width="8" height="32" rx="4" fill="#FFE082" />
+    <rect x="64" y="14" width="8" height="12" rx="4" fill="#FFD54F" />
+    <rect x="80" y="2" width="8" height="36" rx="4" fill="#FFE082" />
+    <rect x="96" y="8" width="8" height="24" rx="4" fill="#FFD54F" />
+    <rect x="112" y="14" width="8" height="12" rx="4" fill="#FFE082" />
+  </g>
+</svg>
