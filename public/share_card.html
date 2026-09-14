@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Ramabhadra&family=Suranna&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 896px;
+      height: 1200px;
+      overflow: hidden;
+      font-family: 'Ramabhadra', 'Outfit', sans-serif;
+      background: #1A0201;
+      position: relative;
+    }
+
+    .poster-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    .overlay-card {
+      position: absolute;
+      bottom: 75px;
+      left: 100px;
+      right: 100px;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(255, 252, 240, 0.96) 0%, rgba(255, 244, 214, 0.98) 100%);
+      border: 3px solid #D4AF37;
+      border-radius: 24px;
+      padding: 24px 28px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 30px rgba(212, 175, 55, 0.5);
+      backdrop-filter: blur(10px);
+    }
+
+    .header-tag {
+      text-align: center;
+      font-size: 26px;
+      font-weight: 800;
+      color: #870D00;
+      margin-bottom: 4px;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+    .sub-tag {
+      text-align: center;
+      font-size: 17px;
+      font-weight: 700;
+      color: #B25900;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .badge-pill {
+      background: linear-gradient(135deg, #FF6F00, #E65100);
+      color: #FFF;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 150px;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 17px;
+      font-weight: 600;
+      color: #381206;
+      line-height: 1.3;
+    }
+
+    .feature-icon {
+      font-size: 20px;
+      width: 28px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .qr-box {
+      background: #FFF;
+      border: 2px solid #D4AF37;
+      border-radius: 16px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .qr-box img {
+      width: 120px;
+      height: 120px;
+      display: block;
+      border-radius: 8px;
+    }
+
+    .qr-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #870D00;
+      margin-top: 6px;
+      font-family: 'Outfit', sans-serif;
+      text-align: center;
+    }
+
+    .url-banner {
+      background: linear-gradient(135deg, #7A0C00, #4A0500);
+      border: 2px solid #FFD54F;
+      border-radius: 14px;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    .url-text-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .url-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #FFD54F;
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .url-link {
+      font-size: 20px;
+      font-weight: 800;
+      color: #FFFFFF;
+      font-family: 'Outfit', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    .url-action-btn {
+      background: linear-gradient(135deg, #FFB300, #FF8F00);
+      color: #2D0800;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+      white-space: nowrap;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #5C2607;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Poster Image Background -->
+  <img src="/assets/poster_clean.jpg" class="poster-bg" alt="Ganesh Poster">
+
+  <!-- Overlaid Information Card -->
+  <div class="overlay-card">
+    <div class="header-tag">శ్రీ వినాయక చవితి విరాళాల మైక్ అనౌన్సర్</div>
+    <div class="sub-tag">
+      <span>పందిరిలో ల్యాప్‌టాప్ అక్కర్లేదు</span>
+      <span class="badge-pill">4G / 5G LIVE SYNC</span>
+      <span>ఫోన్లతోనే నడుపుకోండి</span>
+    </div>
+
+    <div class="main-grid">
+      <div class="feature-list">
+        <div class="feature-item">
+          <span class="feature-icon">🎙️</span>
+          <span><strong>మోహన్ & శృతి</strong> సహజమైన తెలుగు మైక్ అనౌన్స్‌మెంట్</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">📱</span>
+          <span><strong>4G/5G ద్వారా</strong> ఎన్ని మొబైల్ ఫోన్లలోనైనా లైవ్ సింక్</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🔤</span>
+          <span><strong>ఆంగ్లంలో టైప్ చేస్తే</strong> క్షణాల్లో తెలుగులోకి మార్పు</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">💰</span>
+          <span><strong>నగదు & వస్తు రూప</strong> (లడ్డూలు, బియ్యం బస్తాలు) విరాళాలు</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">📲</span>
+          <span><strong>1-క్లిక్ వాట్సాప్ షేరింగ్</strong> & ఆఫ్‌లైన్ సింక్ సదుపాయం</span>
+        </div>
+      </div>
+
+      <div class="qr-box">
+        <img src="/assets/qr_code.png" alt="Scan QR">
+        <div class="qr-label">SCAN TO OPEN APP</div>
+      </div>
+    </div>
+
+    <div class="url-banner">
+      <div class="url-text-wrap">
+        <div class="url-label">🌐 Live Web & Mobile App Link</div>
+        <div class="url-link">https://vinayaka-announcer.onrender.com</div>
+      </div>
+      <div class="url-action-btn">OPEN LIVE ➔</div>
+    </div>
+
+    <div class="footer-note">
+      ఆండ్రాయిడ్ క్రోమ్ బ్రౌజర్ లేదా APK ద్వారా ఉచితంగా ఉపయోగించుకోవచ్చు! 🙏
+    </div>
+  </div>
+</body>
+</html>
