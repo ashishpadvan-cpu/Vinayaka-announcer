@@ -4,4 +4,9 @@ android/.gradle/
 .gradle/
 audio_cache/
 *.apk
+!Vinayaka_Announcer_v3.1.apk
+!Vinayaka_Announcer.apk
 .DS_Store
+data/config.json
+__pycache__/
+

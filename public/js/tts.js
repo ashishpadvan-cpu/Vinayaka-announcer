@@ -1,20 +1,123 @@
-/**
- * Telugu Announcement Formatter and TTS Client
- * Converts numbers & donations to natural Telugu pandal microphone scripts
- * and handles Edge-TTS Neural voice generation with Android Native TTS & Web Speech fallbacks.
- */
+// Celebrity & Neural Voice Persona Configurations
+window.CELEBRITY_PERSONAS = {
+  'mohan': {
+    id: 'mohan',
+    name: 'మోహన్ (Mohan)',
+    voice: 'te-IN-MohanNeural',
+    gender: 'Male',
+    rate: '+0%',
+    pitch: '+0Hz',
+    badge: 'పురుష స్వరం (గంభీరమైన మైక్ ధ్వని)',
+    intro: '',
+    outro: ''
+  },
+  'shruti': {
+    id: 'shruti',
+    name: 'శృతి (Shruti)',
+    voice: 'te-IN-ShrutiNeural',
+    gender: 'Female',
+    rate: '-2%',
+    pitch: '+0Hz',
+    badge: 'స్త్రీ స్వరం (మధురమైన భక్తి భావం)',
+    intro: '',
+    outro: ''
+  },
+  'balayya': {
+    id: 'balayya',
+    name: '🦁 బాలయ్య మాస్ (Balayya Mass Style)',
+    voice: 'te-IN-MohanNeural',
+    gender: 'Male',
+    rate: '+6%',
+    pitch: '-4Hz',
+    badge: 'గాండ్రించే గంభీర స్వరం & మాస్ డైలాగ్స్',
+    intro: 'జై బాలయ్య! దెబ్బకు దయ్యం వదలాలి... మైక్ మోత మోగిపోవాలి! సాక్షాత్తు ఆ వినాయక స్వామి వారి కృపాకటాక్షాలతో...',
+    outro: 'ఫ్లూట్ జింక ముందు ఊదు... సింహం ముందు కాదు! భక్తులందరూ గట్టిగా జై కొట్టండి... జై బాలయ్య! బోలో గణపతి బప్పా మోరియా!'
+  },
+  'baahubali': {
+    id: 'baahubali',
+    name: '👑 బాహుబలి ప్రభాస్ (Prabhas Baahubali)',
+    voice: 'te-IN-MohanNeural',
+    gender: 'Male',
+    rate: '-4%',
+    pitch: '-8Hz',
+    badge: 'గ్రాండ్ రాయల్ బేస్ స్వరం & గంభీరత',
+    intro: 'శ్రీ వినాయక మహారాజ్ దివ్య సమక్షంలో... మాహిష్మతీ సామ్రాజ్య భక్తితో చేయబడుతున్న ప్రకటన...',
+    outro: 'అమరేంద్ర బాహుబలి అను నేను... స్వామివారి భక్తులకు సర్వదా శుభం కలగాలని ఆకాంక్షిస్తున్నాను! జై గణపతి దేవా!'
+  },
+  'pawankalyan': {
+    id: 'pawankalyan',
+    name: '⚡ పవన్ కళ్యాణ్ (Pawan Kalyan Style)',
+    voice: 'te-IN-MohanNeural',
+    gender: 'Male',
+    rate: '+15%',
+    pitch: '+2Hz',
+    badge: 'హై ఎనర్జీ పవర్ పంచ్ స్వరం',
+    intro: 'భక్తజనులందరికీ నా హృదయపూర్వక నమస్కారాలు... మన వినాయక మండపం వద్ద ఈరోజు ఒక గొప్ప విశేషం...',
+    outro: 'మనం చేసే ప్రతి మంచి సంకల్పంలో వినాయక స్వామి వారి ఆశీస్సులు ఉంటాయి... జై హింద్! బోలో గణపతి బప్పా మోరియా!'
+  },
+  'chiranjeevi': {
+    id: 'chiranjeevi',
+    name: '🌟 మెగాస్టార్ చిరంజీవి (Chiranjeevi Heroic)',
+    voice: 'te-IN-MohanNeural',
+    gender: 'Male',
+    rate: '+2%',
+    pitch: '-2Hz',
+    badge: 'రాయల్ వార్మ్ బారిటోన్ & ఆప్యాయత',
+    intro: 'నమస్తే అండీ... మీ చిరంజీవిని. మన వినాయక చవితి పందిరిలో స్వామివారి దివ్య సమక్షంలో...',
+    outro: 'మీ కుటుంబాలన్నీ ఆయురారోగ్య ఐశ్వర్యాలతో సదా సంతోషంగా వర్ధిల్లాలని మనసారా కోరుకుంటున్నాను. గణపతి మహారాజ్ కి జై!'
+  },
+  'brahmanandam': {
+    id: 'brahmanandam',
+    name: '🎭 బ్రహ్మానందం కామెడీ (Brahmanandam Fun)',
+    voice: 'te-IN-MohanNeural',
+    gender: 'Male',
+    rate: '+12%',
+    pitch: '+12Hz',
+    badge: 'కామెడీ కింగ్ సరదా హావభావాలు',
+    intro: 'ఆహా... ఏమి భక్తి! ఏమి చందా! నేనండి మీ ఖాన్ దాదా... కాదు కాదు, మన వినాయక భక్తుడుని!',
+    outro: 'ఇంత గొప్ప మనసుతో విరాళం ఇచ్చినందుకు స్వామివారు వీరికి కోట్ల రూపాయల ఐశ్వర్యం ఇవ్వాలని ఆశిస్తున్నాం... ఆనందో బ్రహ్మ! బోలో గణపతి బప్పా మోరియా!'
+  }
+};
 
 class TeluguTTSAnnouncer {
   constructor() {
     this.selectedVoice = 'te-IN-MohanNeural'; // Default: Mohan (Male)
+    this.selectedPersona = 'mohan';
+    const savedCelebDialogues = localStorage.getItem('vinayaka_include_celeb_dialogues');
+    this.includeCelebrityDialogues = savedCelebDialogues !== null ? (savedCelebDialogues === 'true') : true;
     this.rate = '+0%';
     this.pitch = '+0Hz';
     this.currentAudio = null;
     this.isPlaying = false;
     this.templateStyle = 'traditional'; // 'traditional', 'quick', 'celebration'
+    this.useVoiceClone = true; // Use ElevenLabs cloned voice for custom text when available
+    this.clonedVoices = {};
+    this.hasVoiceCloningApiKey = false;
+    this.voiceCloningSub = null;
     this.onStartCallback = null;
     this.onEndCallback = null;
     this.onErrorCallback = null;
+  }
+
+  /**
+   * Selects voice persona (Mohan, Shruti, Balayya, Baahubali, etc.)
+   */
+  setPersona(personaKey, includeDialogues = null) {
+    if (!window.CELEBRITY_PERSONAS) return null;
+    const persona = window.CELEBRITY_PERSONAS[personaKey];
+    if (persona) {
+      this.selectedPersona = personaKey;
+      this.selectedVoice = persona.voice;
+      this.rate = persona.rate;
+      this.pitch = persona.pitch;
+      if (includeDialogues !== null) {
+        this.includeCelebrityDialogues = Boolean(includeDialogues);
+      } else if (personaKey !== 'mohan' && personaKey !== 'shruti') {
+        this.includeCelebrityDialogues = true;
+      }
+      return persona;
+    }
+    return null;
   }
 
   /**
@@ -25,12 +128,124 @@ class TeluguTTSAnnouncer {
     if (saved && saved.trim()) {
       return saved.trim().replace(/\/+$/, '');
     }
-    // If not localhost or in web browser connected to computer IP
-    if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    const isNativeCapacitor = (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) ||
+                              (window.location && (window.location.origin === 'http://localhost' || window.location.origin === 'capacitor://localhost'));
+    if (isNativeCapacitor) {
+      // Running inside Android APK: connect to live cloud server or saved IP
+      return 'https://vinayaka-announcer.onrender.com';
+    }
+    // In web browser (localhost:8080, 127.0.0.1:8080, LAN IP, or Render web domain)
+    if (window.location && window.location.origin && window.location.origin !== 'null' && window.location.protocol.startsWith('http')) {
       return window.location.origin;
     }
-    // Default LAN IP detected when building
-    return 'http://192.168.0.105:8080';
+    return 'https://vinayaka-announcer.onrender.com';
+  }
+
+  /**
+   * Fetches ElevenLabs Voice Cloning configuration and active cloned voices
+   */
+  async fetchVoiceCloningConfig() {
+    try {
+      const serverUrl = this.getServerBaseUrl();
+      const res = await fetch(`${serverUrl}/api/voice-cloning/config`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        this.hasVoiceCloningApiKey = Boolean(data.hasApiKey);
+        this.clonedVoices = data.clonedVoices || {};
+        this.voiceCloningSub = data.subscription || null;
+        return data;
+      }
+    } catch (e) {
+      console.warn("fetchVoiceCloningConfig error:", e);
+    }
+    return { hasApiKey: false, clonedVoices: {}, subscription: null };
+  }
+
+  /**
+   * Saves or updates ElevenLabs API key
+   */
+  async saveVoiceCloningApiKey(apiKey) {
+    const serverUrl = this.getServerBaseUrl();
+    const res = await fetch(`${serverUrl}/api/voice-cloning/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: apiKey.trim() })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'API Key validation failed');
+    }
+    await this.fetchVoiceCloningConfig();
+    return data;
+  }
+
+  /**
+   * Clones a celebrity voice using an uploaded MP3 file or existing server file
+   */
+  async cloneCelebrityVoice(celebId, file = null, name = '') {
+    const serverUrl = this.getServerBaseUrl();
+    const key = (celebId || this.selectedPersona).replace('celebrity-', '').trim().toLowerCase();
+    let audioBase64 = '';
+
+    if (file) {
+      audioBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("ఆడియో ఫైల్ చదవడం విఫలమైంది"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s for voice cloning model creation
+
+    try {
+      const res = await fetch(`${serverUrl}/api/voice-cloning/clone`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          celebId: key,
+          name: name || `Vinayaka ${key.toUpperCase()} Voice`,
+          audioBase64: audioBase64
+        })
+      });
+      clearTimeout(timeoutId);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Voice cloning failed');
+      }
+      await this.fetchVoiceCloningConfig();
+      return data;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        throw new Error("వాయిస్ క్లోనింగ్ టైమౌట్ అయింది. దయచేసి ఇంటర్నెట్ కనెక్షన్ తనిఖీ చేసి మళ్ళీ ప్రయత్నించండి.");
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Deletes a cloned voice from ElevenLabs & server
+   */
+  async deleteClonedVoice(celebId) {
+    const serverUrl = this.getServerBaseUrl();
+    const key = (celebId || this.selectedPersona).replace('celebrity-', '').trim().toLowerCase();
+    const res = await fetch(`${serverUrl}/api/voice-cloning/delete/${key}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) throw new Error("Delete failed");
+    await this.fetchVoiceCloningConfig();
+    return true;
+  }
+
+  /**
+   * Returns true if the celebrity currently has an active cloned voice
+   */
+  isCelebrityCloned(celebId) {
+    const key = (celebId || this.selectedPersona).replace('celebrity-', '').trim().toLowerCase();
+    return Boolean(this.clonedVoices && this.clonedVoices[key] && this.clonedVoices[key].voice_id);
   }
 
   /**
@@ -155,6 +370,8 @@ class TeluguTTSAnnouncer {
         .replace(/\{purpose\}/gi, purpose);
     }
 
+    // Check if Celebrity Persona dialogue injection is active
+    // Note: Authentic audio punchline clip is merged directly into the audio by the server when includeCelebrityDialogues is active
     if (this.templateStyle === 'quick') {
       return `శ్రీ ${name} గారు, ${place ? place + ' నుండి, ' : ''}${purpose} నిమిత్తం ${donationWords} సమర్పించారు. బోలో గణపతి బప్పా మోరియా!`;
     }
@@ -191,11 +408,22 @@ class TeluguTTSAnnouncer {
 
     let playedSuccessfully = false;
 
-    // 1. Attempt Server-side Edge Neural TTS
+    // 1. Attempt Server-side Neural TTS (with ElevenLabs AI Voice Clone support)
     try {
       const serverUrl = this.getServerBaseUrl();
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s timeout for high quality AI voice synthesis
+
+      const isCeleb = (this.selectedPersona !== 'mohan' && this.selectedPersona !== 'shruti');
+      const celebIntro = options.celebIntro !== undefined
+        ? options.celebIntro
+        : (this.includeCelebrityDialogues && isCeleb ? this.selectedPersona : null);
+
+      const useClone = options.useClone !== undefined
+        ? options.useClone
+        : (this.useVoiceClone && isCeleb);
+
+      const celebId = options.celebId || (isCeleb ? this.selectedPersona : null);
 
       const res = await fetch(`${serverUrl}/api/tts`, {
         method: 'POST',
@@ -203,9 +431,12 @@ class TeluguTTSAnnouncer {
         signal: controller.signal,
         body: JSON.stringify({
           text: text,
-          voice: this.selectedVoice,
-          rate: this.rate,
-          pitch: this.pitch
+          voice: options.voice || this.selectedVoice,
+          rate: options.rate !== undefined ? options.rate : this.rate,
+          pitch: options.pitch !== undefined ? options.pitch : this.pitch,
+          celebIntro: celebIntro,
+          useClone: useClone,
+          celebId: celebId
         })
       });
       clearTimeout(timeoutId);
@@ -358,6 +589,308 @@ class TeluguTTSAnnouncer {
     if (window.pandalAudio) {
       window.pandalAudio.duckBGM(false);
     }
+  }
+
+  /**
+   * Generates or fetches Neural TTS audio URL from the server
+   */
+  async generateAudioUrl(text, options = {}) {
+    if (!text || !text.trim()) throw new Error("ప్రకటన పాఠం ఖాళీగా ఉంది (Empty announcement text)");
+    const serverUrl = this.getServerBaseUrl();
+    const voice = options.voice || this.selectedVoice || 'te-IN-MohanNeural';
+    const rate = options.rate !== undefined ? options.rate : this.rate;
+    const pitch = options.pitch !== undefined ? options.pitch : this.pitch;
+
+    const isCeleb = (this.selectedPersona !== 'mohan' && this.selectedPersona !== 'shruti');
+    const celebIntro = options.celebIntro !== undefined
+      ? options.celebIntro
+      : (this.includeCelebrityDialogues && isCeleb ? this.selectedPersona : null);
+
+    const useClone = options.useClone !== undefined
+      ? options.useClone
+      : (this.useVoiceClone && isCeleb);
+
+    const celebId = options.celebId || (isCeleb ? this.selectedPersona : null);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 35000);
+
+    try {
+      const res = await fetch(`${serverUrl}/api/tts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          text: text.trim(),
+          voice: voice,
+          rate: rate,
+          pitch: pitch,
+          celebIntro: celebIntro,
+          useClone: useClone,
+          celebId: celebId
+        })
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `సర్వర్ లోపం: ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (!data.audioUrl) throw new Error("ఆడియో URL రాలేదు");
+
+      const fullAudioUrl = data.audioUrl.startsWith('http') ? data.audioUrl : `${serverUrl}${data.audioUrl}`;
+      return {
+        audioUrl: data.audioUrl,
+        fullAudioUrl: fullAudioUrl,
+        cached: data.cached,
+        voice: voice,
+        text: text,
+        celebIntro: data.celebIntro
+      };
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        throw new Error("ఆడియో జనరేషన్ టైమౌట్ అయింది. దయచేసి మళ్ళీ ప్రయత్నించండి.");
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Plays the authentic celebrity audio punchline clip alone
+   */
+  async playCelebrityClip(celebId) {
+    const key = (celebId || this.selectedPersona).replace('celebrity-', '').trim().toLowerCase();
+    const serverUrl = this.getServerBaseUrl();
+    const clipUrl = `${serverUrl}/audio/celebrities/${key}.mp3?t=${Date.now()}`;
+    await this.playAudioUrl(clipUrl);
+  }
+
+  /**
+   * Uploads user's custom MP3 clip to replace default celebrity audio
+   */
+  async uploadCelebrityClip(celebId, file) {
+    if (!file) throw new Error("ఆడియో ఫైల్ ఎంచుకోలేదు");
+    if (file.size > 25 * 1024 * 1024) {
+      throw new Error("ఆడియో ఫైల్ సైజు 25MB కంటే తక్కువగా ఉండాలి");
+    }
+
+    const key = (celebId || this.selectedPersona).replace('celebrity-', '').trim().toLowerCase();
+    const serverUrl = this.getServerBaseUrl();
+
+    const base64Data = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("ఫైల్ చదవడం విఫలమైంది"));
+      reader.readAsDataURL(file);
+    });
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s timeout
+
+    try {
+      const res = await fetch(`${serverUrl}/api/celebrity-clip/${key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          audioBase64: base64Data,
+          filename: file.name
+        })
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `అప్‌లోడ్ విఫలమైంది (${res.status})`);
+      }
+      return await res.json();
+    } catch (fetchErr) {
+      clearTimeout(timeoutId);
+      if (fetchErr.name === 'AbortError') {
+        throw new Error("ఆడియో అప్‌లోడ్ టైమౌట్ అయింది. దయచేసి చిన్న ఫైల్ ఎంచుకోండి.");
+      }
+      throw fetchErr;
+    }
+  }
+
+  /**
+   * Resets custom clip back to original default starter clip
+   */
+  async resetCelebrityClip(celebId) {
+    const key = (celebId || this.selectedPersona).replace('celebrity-', '').trim().toLowerCase();
+    const serverUrl = this.getServerBaseUrl();
+    const res = await fetch(`${serverUrl}/api/celebrity-clip/${key}/reset`, {
+      method: 'POST'
+    });
+    if (!res.ok) throw new Error('Reset failed');
+    return await res.json();
+  }
+
+  /**
+   * Generates and downloads MP3 audio file to the device/browser.
+   * Guarantees strict .mp3 format with audio/mpeg MIME type across native Android, PWA, and all web browsers.
+   */
+  async downloadMp3(text, suggestedFilename = 'Vinayaka_Announcement.mp3', options = {}) {
+    let cleanName = (suggestedFilename || 'Vinayaka_Announcement.mp3').trim();
+    if (!cleanName.toLowerCase().endsWith('.mp3')) cleanName += '.mp3';
+
+    // 1. Generate audio on server
+    const audioData = await this.generateAudioUrl(text, options);
+    const audioUrl = audioData.fullAudioUrl;
+
+    // 2. Build direct attachment download URL (forces Content-Disposition and audio/mpeg)
+    const directDownloadUrl = `${audioUrl}${audioUrl.includes('?') ? '&' : '?'}download=1&name=${encodeURIComponent(cleanName)}`;
+
+    // 3. Priority 1: Native Android Downloader bridge (direct save into Android Downloads folder as .mp3)
+    if (window.AndroidNativeDownloader && typeof window.AndroidNativeDownloader.saveMp3 === 'function') {
+      try {
+        const resp = await fetch(directDownloadUrl);
+        if (resp.ok) {
+          const blob = await resp.blob();
+          const base64Data = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          const saved = window.AndroidNativeDownloader.saveMp3(base64Data, cleanName);
+          if (saved) {
+            this._showDirectDownloadLink(directDownloadUrl, cleanName);
+            return directDownloadUrl;
+          }
+        }
+      } catch (nativeErr) {
+        console.warn("Native Android downloader encountered an issue, falling back to web download:", nativeErr);
+      }
+    }
+
+    // 4. Priority 2: Web Browser Blob Download with explicit audio/mpeg MIME type
+    let downloadSuccess = false;
+    try {
+      const response = await fetch(directDownloadUrl);
+      if (response.ok) {
+        const rawBlob = await response.blob();
+        // CRITICAL: Explicitly declare audio/mpeg so OS/Browser guarantees .mp3 format
+        const audioBlob = new Blob([rawBlob], { type: 'audio/mpeg' });
+        const blobUrl = window.URL.createObjectURL(audioBlob);
+
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = blobUrl;
+        a.download = cleanName;
+        a.setAttribute('download', cleanName);
+        document.body.appendChild(a);
+        a.click();
+
+        setTimeout(() => {
+          if (a.parentNode) a.parentNode.removeChild(a);
+          window.URL.revokeObjectURL(blobUrl);
+        }, 10000);
+        downloadSuccess = true;
+      }
+    } catch (blobErr) {
+      console.warn("Blob download attempt had an issue:", blobErr);
+    }
+
+    // 5. Priority 3: Direct anchor click fallback (only if Blob download failed)
+    if (!downloadSuccess) {
+      try {
+        const aLink = document.createElement('a');
+        aLink.style.display = 'none';
+        aLink.href = directDownloadUrl;
+        aLink.setAttribute('download', cleanName);
+        aLink.setAttribute('target', '_blank');
+        document.body.appendChild(aLink);
+        aLink.click();
+        setTimeout(() => {
+          if (aLink.parentNode) aLink.parentNode.removeChild(aLink);
+        }, 3000);
+        downloadSuccess = true;
+      } catch (aErr) {
+        console.warn("Anchor fallback trigger error:", aErr);
+      }
+    }
+
+    // 6. Confirmation Banner with one-click direct MP3 download button
+    this._showDirectDownloadLink(directDownloadUrl, cleanName);
+
+    return directDownloadUrl;
+  }
+
+  /**
+   * Shows a floating download confirmation pill with a direct clickable link
+   */
+  _showDirectDownloadLink(downloadUrl, filename) {
+    const existing = document.getElementById('vinayaka-download-pill');
+    if (existing) existing.remove();
+
+    const pill = document.createElement('div');
+    pill.id = 'vinayaka-download-pill';
+    pill.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 99999;
+      background: linear-gradient(135deg, #1A1208, #2A1D0D);
+      border: 2px solid #FFD54F;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 15px rgba(255,213,79,0.3);
+      padding: 12px 18px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: inherit;
+      animation: slideInUp 0.3s ease-out;
+    `;
+
+    pill.innerHTML = `
+      <div style="font-size: 1.4rem;">📥</div>
+      <div style="flex: 1;">
+        <div style="font-size: 0.85rem; font-weight: 700; color: #FFF;">MP3 ఆడియో సిద్ధమైంది!</div>
+        <div style="font-size: 0.72rem; color: #FFD54F; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${filename}</div>
+      </div>
+      <a href="${downloadUrl}" download="${filename}" type="audio/mpeg" target="_blank" style="
+        background: #FF9800;
+        color: #000;
+        text-decoration: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      ">💾 సేవ్ చేయండి</a>
+      <button onclick="this.parentElement.remove()" style="
+        background: transparent;
+        border: none;
+        color: #999;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 2px;
+      ">✕</button>
+    `;
+
+    document.body.appendChild(pill);
+    setTimeout(() => {
+      if (pill.parentNode) pill.remove();
+    }, 12000);
+  }
+
+  /**
+   * Generates announcement script for a donation and downloads strictly as .mp3
+   */
+  async downloadDonationMp3(donation, options = {}) {
+    if (!donation) throw new Error("Donation data is missing");
+    const script = this.generateAnnouncementScript(donation);
+    const rawDevotee = (donation.name || 'భక్తుడు').trim()
+      .replace(/[\/\\?%*:|"<>]/g, '_')
+      .replace(/\s+/g, '_');
+    const filename = `వినాయక_విరాళం_${rawDevotee || 'భక్తుడు'}.mp3`;
+    return await this.downloadMp3(script, filename, options);
   }
 }
 

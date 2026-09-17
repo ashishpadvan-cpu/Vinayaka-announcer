@@ -10,8 +10,21 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="icon" type="image/png" href="/assets/icon.png">
   <link rel="apple-touch-icon" href="/assets/icon.png">
-  <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="/css/style.css?v=5">
+  <link rel="stylesheet" href="/css/style.css?v=2.2">
+  <script>
+    try {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          for (var r of regs) { r.unregister(); }
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (var n of names) { caches.delete(n); }
+        });
+      }
+    } catch(e) {}
+  </script>
 </head>
 <body>
 
@@ -23,7 +36,7 @@
         <div class="startup-glow-ring"></div>
       </div>
       <div class="startup-title-te">🕉️ శ్రీ వినాయక చవితి చందా & విరాళాల మైక్ అనౌన్స్‌మెంట్</div>
-      <div class="startup-title-en">Vinayaka Pandal Mic Announcer v2.1</div>
+      <div class="startup-title-en">Vinayaka Pandal Mic Announcer v3.1</div>
       <div class="startup-slokam">"వక్రతుండ మహాకాయ సూర్యకోటి సమప్రభ... నిర్విఘ్నం కురు మే దేవ సర్వకార్యేషు సర్వదా"</div>
       
       <!-- Startup Progress Bar & Loading Indicator -->
@@ -42,13 +55,22 @@
       <div class="header-branding">
         <img src="/assets/icon.png" alt="Vinayaka Announcer Icon" class="header-icon" id="app-logo">
         <div class="header-titles">
-          <h1>శ్రీ వినాయక చవితి విరాళాల ప్రకటన <span style="background: #E64A19; color: #FFF; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; vertical-align: middle;">v2.1</span></h1>
+          <h1>శ్రీ వినాయక చవితి విరాళాల ప్రకటన <span style="background: #E64A19; color: #FFF; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; vertical-align: middle;">v3.1</span></h1>
           <div class="app-subtitle">Vinayaka Pandal Donation Mic Announcer (Android)</div>
         </div>
       </div>
       <div class="header-actions">
+        <a href="/Vinayaka_Announcer_v3.1.apk" download="Vinayaka_Announcer_v3.1.apk" class="btn-header highlight-apk" style="background: linear-gradient(135deg, #1565C0, #0D47A1); color: #FFF; text-decoration: none; font-weight: 700;" title="తాజా v3.1 ఆండ్రాయిడ్ యాప్ APK డౌన్‌లోడ్ చేసుకోండి">
+          📱 APK v3.1
+        </a>
         <button class="btn-header" id="btn-toggle-translit" title="ఆంగ్లంలో టైప్ చేస్తే తెలుగులోకి మార్చండి">
           🔤 EN ➔ తె: <span id="translit-status" style="color:#00E676;">ON</span>
+        </button>
+        <button class="btn-header highlight-clone" id="btn-open-voice-cloning" title="ElevenLabs AI సెలబ్రిటీ వాయిస్ క్లోనింగ్ (Voice Clone)">
+          🧬 AI వాయిస్ క్లోనింగ్
+        </button>
+        <button class="btn-header highlight-tts" id="btn-open-custom-tts" title="తెలుగు టెక్స్ట్-టు-స్పీచ్ & MP3 డౌన్‌లోడ్">
+          🎙️ తెలుగు TTS స్టూడియో
         </button>
         <button class="btn-header" id="btn-open-template-modal" title="మైక్ ప్రకటన పాఠం సవరించండి">
           📝 ప్రకటన పాఠం
@@ -123,22 +145,113 @@
       </div>
     </section>
 
+    <!-- High Visibility Telugu Text-to-Speech Studio & MP3 Downloader Banner -->
+    <section class="tts-feature-banner" id="banner-open-tts-studio" title="తెలుగు టెక్స్ట్-టు-స్పీచ్ & MP3 డౌన్‌లోడ్ స్టూడియో తెరవండి">
+      <div class="tts-banner-left">
+        <div class="tts-banner-pill">✨ ప్రత్యేక ఫీచర్ v3.1 • AI మైక్ స్టూడియో</div>
+        <h3 class="tts-banner-heading">🎙️ తెలుగు టెక్స్ట్-టు-స్పీచ్ (TTS) స్టూడియో & MP3 డౌన్‌లోడ్</h3>
+        <p class="tts-banner-sub">మీకు నచ్చిన తెలుగు లేదా ఇంగ్లీష్ టెక్స్ట్ రాయండి — మోహన్, శృతి లేదా బాలయ్య, బాహుబలి సినీ స్వరాలలో వినండి & శాశ్వతంగా MP3 ఆడియోగా డౌన్‌లోడ్ చేసుకోండి!</p>
+      </div>
+      <button type="button" class="btn-primary tts-banner-btn" id="btn-banner-open-tts">
+        🎙️ TTS స్టూడియో తెరవండి ➔
+      </button>
+    </section>
+
     <!-- Audio & Voice Settings Deck -->
     <section class="settings-deck">
       <div class="deck-title">
         <span>🎙️ మైక్ & తెలుగు స్వరం సెట్టింగ్స్ (Realistic Human Voices)</span>
       </div>
 
-      <!-- Dual Human Voice Selection -->
-      <div class="voice-switch-row">
-        <label class="voice-radio-label">
-          <input type="radio" name="voiceSelect" id="voice-mohan" value="te-IN-MohanNeural" checked>
-          <span>👨 మోహన్ (పురుష స్వరం - Mohan Male)</span>
-        </label>
-        <label class="voice-radio-label">
-          <input type="radio" name="voiceSelect" id="voice-shruti" value="te-IN-ShrutiNeural">
-          <span>👩 శృతి (స్త్రీ స్వరం - Shruti Female)</span>
-        </label>
+      <!-- Voice & Celebrity Personas Selection -->
+      <div class="persona-switch-wrap">
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-gold); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+          <span>🎙️ స్వరం & సెలబ్రిటీ స్టైల్ ఎంపిక (Select Voice / Celebrity):</span>
+          <span id="active-persona-badge" class="persona-badge-pill">మోహన్ (పురుష స్వరం)</span>
+        </div>
+        <div class="voice-switch-row voice-persona-grid">
+          <label class="voice-radio-label">
+            <input type="radio" name="voiceSelect" id="voice-mohan" value="mohan" checked>
+            <span>👨 మోహన్ (Mohan)</span>
+          </label>
+          <label class="voice-radio-label">
+            <input type="radio" name="voiceSelect" id="voice-shruti" value="shruti">
+            <span>👩 శృతి (Shruti)</span>
+          </label>
+          <label class="voice-radio-label celeb-card" title="గాండ్రించే గంభీర స్వరం & మాస్ డైలాగ్స్">
+            <input type="radio" name="voiceSelect" id="voice-balayya" value="balayya">
+            <span>🦁 బాలయ్య మాస్</span>
+          </label>
+          <label class="voice-radio-label celeb-card" title="గ్రాండ్ రాయల్ బేస్ స్వరం & గంభీరత">
+            <input type="radio" name="voiceSelect" id="voice-baahubali" value="baahubali">
+            <span>👑 బాహుబలి ప్రభాస్</span>
+          </label>
+          <label class="voice-radio-label celeb-card" title="హై ఎనర్జీ పవర్ పంచ్ స్వరం">
+            <input type="radio" name="voiceSelect" id="voice-pawankalyan" value="pawankalyan">
+            <span>⚡ పవన్ కళ్యాణ్</span>
+          </label>
+          <label class="voice-radio-label celeb-card" title="రాయల్ వార్మ్ బారిటోన్ & ఆప్యాయత">
+            <input type="radio" name="voiceSelect" id="voice-chiranjeevi" value="chiranjeevi">
+            <span>🌟 మెగాస్టార్ చిరంజీవి</span>
+          </label>
+          <label class="voice-radio-label celeb-card" title="కామెడీ కింగ్ సరదా హావభావాలు">
+            <input type="radio" name="voiceSelect" id="voice-brahmanandam" value="brahmanandam">
+            <span>🎭 బ్రహ్మానందం కామెడీ</span>
+          </label>
+        </div>
+
+        <!-- Real Celebrity Voice Audio Clip & AI Voice Cloning Management Box -->
+        <div id="celeb-clip-control-box" class="celeb-clip-control-box" style="display: none;">
+          <div class="celeb-clip-header">
+            <div class="celeb-clip-title">
+              <span>🎬 సెలబ్రిటీ వాయిస్ ప్రొఫైల్:</span>
+              <span id="celeb-clip-badge" class="celeb-clip-badge">బాలయ్య మాస్ డైలాగ్</span>
+            </div>
+            <div class="celeb-clone-badge-wrap">
+              <span id="celeb-clone-status-pill" class="clone-status-pill active" title="AI Voice Status">✨ డైలాగ్ + AI స్పీచ్ రెడీ</span>
+            </div>
+          </div>
+
+          <div id="celeb-clip-quote" class="celeb-clip-quote">
+            "ఫ్లూట్ జింక ముందు ఊదు... సింహం ముందు కాదు! జై బాలయ్య!"
+          </div>
+
+          <!-- Section: Authentic Celebrity Dialogue + Telugu AI Announcement Engine -->
+          <div class="celeb-clone-panel">
+            <div class="celeb-clone-panel-title">
+              <span>🎙️ సెలబ్రిటీ డైలాగ్ + AI తెలుగు ప్రకటన ఇంజిన్:</span>
+              <button type="button" id="btn-open-clone-settings-link" class="btn-link-gold" title="ElevenLabs API కీ & సెట్టింగ్స్">⚙️ API సెట్టింగ్స్</button>
+            </div>
+            <div id="celeb-clone-explainer" class="celeb-clone-explainer">
+              మీరు అప్‌లోడ్ చేసిన <strong>అసలైన సినిమా డైలాగ్ MP3</strong> ప్రకటన ముందు వినిపిస్తుంది. ఆ తర్వాత భక్తుల పేర్లు, గోత్రం మరియు విరాళం వివరాలు అన్నీ <strong>ElevenLabs Telugu AI</strong> స్వరంలో స్పష్టంగా మైక్ లో చదువుతుంది!
+            </div>
+            <div class="celeb-clone-actions-row">
+              <button type="button" id="btn-play-celeb-clip" class="btn-celeb-action play">
+                <span class="btn-icon">▶️</span>
+                <span>డైలాగ్ వినండి (Play)</span>
+              </button>
+              <button type="button" id="btn-upload-celeb-clip" class="btn-celeb-action upload" title="మీ ఫోన్ లేదా కంప్యూటర్ నుండి సినిమా డైలాగ్ లేదా వాట్సాప్ MP3 ఆడియోని అప్‌లోడ్ చేయండి">
+                <span class="btn-icon">📁</span>
+                <span>రియల్ MP3 అప్‌లోడ్ చేయండి</span>
+              </button>
+              <button type="button" id="btn-test-cloned-audio" class="btn-celeb-action test-clone" title="డైలాగ్ + తెలుగు విరాళం పూర్తి శాంపిల్ వినండి">
+                <span class="btn-icon">🔊</span>
+                <span>పూర్తి ప్రకటన టెస్ట్</span>
+              </button>
+              <button type="button" id="btn-reset-celeb-clip" class="btn-celeb-action reset" title="డిఫాల్ట్ డైలాగ్‌కి రీసెట్ చేయండి">
+                <span class="btn-icon">🔄</span>
+                <span>రీసెట్</span>
+              </button>
+              <input type="file" id="input-celeb-file" accept="audio/*" style="display: none;">
+            </div>
+            <div class="celeb-clone-toggle-row">
+              <label class="checkbox-unread-wrap" style="font-size: 0.76rem; color: #00E676; cursor: pointer; font-weight: 700;" title="ప్రతి ప్రకటన ప్రారంభంలో మరియు MP3 డౌన్‌లోడ్‌లో ఈ అసలైన సెలబ్రిటీ డైలాగ్ చేర్చండి">
+                <input type="checkbox" id="toggle-celebrity-dialogues" checked>
+                <span>🌟 ప్రకటనల ముందు & MP3 డౌన్‌లోడ్‌లో ఈ అసలైన డైలాగ్ చేర్చండి (Prepend to MP3)</span>
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Pandal Audio Toggles -->
@@ -223,6 +336,9 @@
           <button type="button" class="btn-bulk-tool" id="btn-export-csv">
             📊 ఎక్సెల్ / CSV ఎగుమతి
           </button>
+          <button type="button" class="btn-bulk-tool highlight-tts-btn" id="btn-toolbar-custom-tts" title="ఏదైనా తెలుగు టెక్స్ట్ రాసి మైక్ లో వినండి & MP3 డౌన్‌లోడ్ చేసుకోండి">
+            🎙️ కస్టమ్ మైక్ TTS & MP3
+          </button>
         </div>
       </div>
     </section>
@@ -236,6 +352,7 @@
         <button type="button" class="btn-bulk-act" id="btn-bulk-select-all">అన్నీ ఎంచుకో</button>
         <button type="button" class="btn-bulk-act" id="btn-bulk-mark-read">✓ చదివారు</button>
         <button type="button" class="btn-bulk-act" id="btn-bulk-mark-unread">○ చదవలేదు</button>
+        <button type="button" class="btn-bulk-act highlight-mp3" id="btn-bulk-download-mp3" title="ఎంపిక చేసిన అన్ని విరాళాల ఆడియోను వరుసగా MP3 గా డౌన్‌లోడ్ చేయండి">⬇️ ఎంపిక చేసినవి MP3</button>
         <button type="button" class="btn-bulk-act highlight" id="btn-bulk-open-update-modal">✏️ బల్క్ అప్‌డేట్</button>
         <button type="button" class="btn-bulk-act danger" id="btn-bulk-delete">🗑️ తొలగించు</button>
         <button type="button" class="btn-bulk-act" id="btn-bulk-cancel">❌ రద్దు</button>
@@ -347,9 +464,14 @@
               <button type="button" class="preset-btn" id="btn-regenerate-script" title="వివరాల ఆధారంగా మళ్ళీ రూపొందించండి">↺ ఆటో-రీసెట్</button>
             </div>
             <textarea id="input-custom-script" class="form-input" rows="4" style="font-size: 0.86rem; line-height: 1.5; color: #FFF9C4; border: 1.5px solid var(--color-gold); background: rgba(0,0,0,0.5);" placeholder="మైక్ లో ప్రకటించాల్సిన పూర్తి పాఠం ఇక్కడ వస్తుంది... దీన్ని మీరు నేరుగా మార్చుకోవచ్చు."></textarea>
-            <span style="font-size: 0.72rem; color: var(--color-text-subtle); display: block; margin-top: 4px;">
-              💡 మైక్ లో ఈ భక్తునికి ఖచ్చితంగా ఇక్కడ ఉన్న పాఠమే చదవబడుతుంది. మీరు అవసరమైన విధంగా మార్పులు చేసుకోవచ్చు.
-            </span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; flex-wrap: wrap; gap: 8px;">
+              <span style="font-size: 0.72rem; color: var(--color-text-subtle); flex: 1; min-width: 200px;">
+                💡 మైక్ లో ఈ భక్తునికి ఖచ్చితంగా ఇక్కడ ఉన్న పాఠమే చదవబడుతుంది.
+              </span>
+              <button type="button" class="preset-btn" id="btn-modal-download-mp3" style="background: rgba(0, 230, 118, 0.15); color: #00E676; border: 1px solid #00E676; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px;">
+                <span>⬇️</span> ఈ విరాళం MP3 డౌన్‌లోడ్
+              </button>
+            </div>
           </div>
         </div>
 
@@ -708,14 +830,330 @@
         <!-- Download APK Section -->
         <div style="margin-top: 14px; text-align: left; background: rgba(255, 179, 0, 0.08); padding: 10px 14px; border-radius: 8px; font-size: 0.78rem; color: var(--color-text-main); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
           <div>
-            <strong>📱 ఆండ్రాయిడ్ యాప్ (APK v2.1):</strong><br>
+            <strong>📱 ఆండ్రాయిడ్ యాప్ (APK v3.1):</strong><br>
             <span style="color: var(--color-text-muted); font-size: 0.72rem;">ఫోన్లలో శాశ్వతంగా ఇన్‌స్టాల్ చేసుకోవడానికి</span>
           </div>
-          <a href="/Vinayaka_Announcer_v2.apk" download class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 8px 14px; font-size: 0.82rem;">
-            ⬇️ APK డౌన్‌లోడ్
+          <a href="/Vinayaka_Announcer_v3.1.apk" download="Vinayaka_Announcer_v3.1.apk" class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 8px 14px; font-size: 0.82rem;">
+            ⬇️ APK డౌన్‌లోడ్ (v3.1)
           </a>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Telugu TTS Announcement Studio Modal (తెలుగు టెక్స్ట్-టు-స్పీచ్ & MP3 డౌన్‌లోడ్) -->
+  <div class="modal-overlay" id="custom-tts-modal">
+    <div class="modal-content" style="max-width: 660px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.6rem; line-height: 1;">🎙️</span>
+          <div>
+            <h3 style="margin-bottom: 2px;">తెలుగు మైక్ ప్రకటన స్టూడియో & MP3 డౌన్‌లోడ్</h3>
+            <p style="font-size: 0.76rem; color: var(--color-gold);">
+              Telugu Text-to-Speech Studio — Type Any Telugu Text, Listen & Download as MP3
+            </p>
+          </div>
+        </div>
+        <button class="btn-modal-close" id="btn-close-custom-tts">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 16px;">
+        <!-- Preset Announcement Templates / Chips -->
+        <div class="tts-preset-section">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 0.78rem; font-weight: 700; color: var(--color-gold);">
+              ⚡ త్వరిత పందిరి ప్రకటనల నమూనాలు (క్లిక్ చేసి ఎంచుకోండి):
+            </span>
+            <span style="font-size: 0.7rem; color: var(--color-text-subtle);">Quick Presets</span>
+          </div>
+          <div class="preset-pills tts-presets-wrap">
+            <button type="button" class="preset-btn tts-preset-chip" data-preset="puja">🪔 పూజా & హారతి సమయాలు</button>
+            <button type="button" class="preset-btn tts-preset-chip" data-preset="prasadam">🍲 ప్రసాదం & అన్నదానం</button>
+            <button type="button" class="preset-btn tts-preset-chip" data-preset="laddu">🏆 లడ్డూ ప్రసాదం వేలం పాట</button>
+            <button type="button" class="preset-btn tts-preset-chip" data-preset="cultural">🎭 సాంస్కృతిక కార్యక్రమాలు</button>
+            <button type="button" class="preset-btn tts-preset-chip" data-preset="parking">🚗 క్రమశిక్షణ & పార్కింగ్</button>
+            <button type="button" class="preset-btn tts-preset-chip" data-preset="nimajjanam">🚩 నిమజ్జనం & శోభాయాత్ర</button>
+            <button type="button" class="preset-btn tts-preset-chip" data-preset="wishes">🙏 స్వాగతం & శుభాకాంక్షలు</button>
+            <button type="button" class="preset-btn tts-preset-chip celeb-chip" data-preset="celeb_balayya">🦁 బాలయ్య మాస్ పంచ్ డైలాగ్</button>
+            <button type="button" class="preset-btn tts-preset-chip celeb-chip" data-preset="celeb_baahubali">👑 బాహుబలి పందిరి ప్రతిజ్ఞ</button>
+            <button type="button" class="preset-btn tts-preset-chip celeb-chip" data-preset="celeb_pawankalyan">⚡ పవన్ కళ్యాణ్ పవర్ స్పీచ్</button>
+            <button type="button" class="preset-btn tts-preset-chip celeb-chip" data-preset="celeb_brahmanandam">🎭 బ్రహ్మానందం చందా కామెడీ</button>
+          </div>
+        </div>
+
+        <!-- Transliteration Bar & Input Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0 6px; flex-wrap: wrap; gap: 8px;">
+          <label for="input-custom-tts-text" style="font-size: 0.84rem; font-weight: 700; color: var(--color-gold); margin-bottom: 0;">
+            ✍️ మైక్ లో ప్రకటించాల్సిన తెలుగు పాఠం (Announcement Text) *
+          </label>
+          <button type="button" class="btn-translit-studio-toggle" id="btn-studio-toggle-translit" title="ఇంగ్లీష్ టైపింగ్ ను తెలుగులోకి మార్చు">
+            🔤 EN ➔ తె: <span id="studio-translit-status" style="color: #00E676; font-weight: 700;">ON</span>
+          </button>
+        </div>
+
+        <!-- Textarea -->
+        <div class="form-group" style="position: relative; margin-bottom: 6px;">
+          <textarea id="input-custom-tts-text" class="form-input custom-tts-textarea" rows="5" placeholder="మీరు ప్రకటించాలనుకుంటున్న తెలుగు టెక్స్ట్ ఇక్కడ టైప్ చేయండి లేదా పేస్ట్ చేయండి...&#10;(ఇంగ్లీష్ లో టైప్ చేసినా ఆటోమేటిక్ గా తెలుగులోకి మారుతుంది. ఉదా: గణపతి బప్పా మోరియా...)" style="font-size: 0.92rem; line-height: 1.6; color: #FFFDE7; border: 1.5px solid var(--color-gold); background: rgba(20, 4, 1, 0.7);"></textarea>
+        </div>
+
+        <!-- Text Statistics & Tool Actions -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 0.74rem; color: var(--color-text-muted); flex-wrap: wrap; gap: 8px;">
+          <div id="tts-stats-display" style="display: flex; gap: 12px;">
+            <span>అక్షరాలు: <strong id="tts-stat-chars" style="color: var(--color-gold);">0</strong></span>
+            <span>పదాలు: <strong id="tts-stat-words" style="color: var(--color-gold);">0</strong></span>
+            <span>అంచనా సమయం: <strong id="tts-stat-duration" style="color: #00E676;">~0 సెకన్లు</strong></span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="preset-btn" id="btn-tts-copy-text" title="పాఠాన్ని కాపీ చేయండి">📋 కాపీ</button>
+            <button type="button" class="preset-btn" id="btn-tts-clear-text" title="మొత్తం క్లియర్ చేయండి">🗑️ క్లియర్</button>
+          </div>
+        </div>
+
+        <!-- Voice & Audio Settings -->
+        <div class="tts-voice-tuning-deck">
+          <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-gold); margin-bottom: 8px;">
+            🎙️ స్వరం & సౌండ్ ఎఫెక్ట్స్ (Neural Voices & Effects)
+          </div>
+
+          <!-- Voice & Celebrity Selection -->
+          <div class="voice-switch-row voice-persona-grid" style="margin-bottom: 10px;">
+            <label class="voice-radio-label">
+              <input type="radio" name="studioVoiceSelect" id="studio-voice-mohan" value="mohan" checked>
+              <span>👨 మోహన్</span>
+            </label>
+            <label class="voice-radio-label">
+              <input type="radio" name="studioVoiceSelect" id="studio-voice-shruti" value="shruti">
+              <span>👩 శృతి</span>
+            </label>
+            <label class="voice-radio-label celeb-card">
+              <input type="radio" name="studioVoiceSelect" id="studio-voice-balayya" value="balayya">
+              <span>🦁 బాలయ్య మాస్</span>
+            </label>
+            <label class="voice-radio-label celeb-card">
+              <input type="radio" name="studioVoiceSelect" id="studio-voice-baahubali" value="baahubali">
+              <span>👑 బాహుబలి</span>
+            </label>
+            <label class="voice-radio-label celeb-card">
+              <input type="radio" name="studioVoiceSelect" id="studio-voice-pawankalyan" value="pawankalyan">
+              <span>⚡ పవన్ కళ్యాణ్</span>
+            </label>
+            <label class="voice-radio-label celeb-card">
+              <input type="radio" name="studioVoiceSelect" id="studio-voice-chiranjeevi" value="chiranjeevi">
+              <span>🌟 చిరంజీవి</span>
+            </label>
+            <label class="voice-radio-label celeb-card">
+              <input type="radio" name="studioVoiceSelect" id="studio-voice-brahmanandam" value="brahmanandam">
+              <span>🎭 బ్రహ్మానందం</span>
+            </label>
+          </div>
+
+          <!-- Studio Celebrity Voice Clip Quick Bar -->
+          <div id="studio-celeb-box" class="studio-celeb-box" style="display: none; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span id="studio-celeb-title" style="font-size: 0.78rem; font-weight: 700; color: var(--color-gold);">
+                🎬 సెలబ్రిటీ వాయిస్ క్లిప్:
+              </span>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" id="btn-studio-play-celeb" class="btn-xs-gold" title="ఈ సెలబ్రిటీ పంచ్ డైలాగ్ ఆడియో వినండి">
+                  ▶️ డైలాగ్ వినండి
+                </button>
+              </div>
+            </div>
+            <div style="margin-top: 6px;">
+              <label class="checkbox-unread-wrap" style="font-size: 0.74rem; color: #FFF8E1; cursor: pointer;">
+                <input type="checkbox" id="studio-toggle-celeb-intro" checked>
+                <span>🌟 ఈ డైలాగ్‌ను ప్రకటన ప్రారంభంలో & MP3 డౌన్‌లోడ్‌లో చేర్చండి</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Sound Effects Toggles -->
+          <div class="audio-toggles-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 10px;">
+            <label class="toggle-card">
+              <input type="checkbox" id="studio-toggle-bell" checked>
+              <span>🔔 ప్రారంభ గంట ధ్వని</span>
+            </label>
+            <label class="toggle-card">
+              <input type="checkbox" id="studio-toggle-echo" checked>
+              <span>📢 మైక్ ఎకో (Reverb)</span>
+            </label>
+            <label class="toggle-card">
+              <input type="checkbox" id="studio-toggle-shankh">
+              <span>🐚 శంఖ నాదం</span>
+            </label>
+          </div>
+
+          <!-- Sliders: Speed and Pitch -->
+          <div class="sliders-row" style="margin-top: 0; padding: 6px 10px;">
+            <div class="slider-group">
+              <span>వేగం:</span>
+              <input type="range" id="studio-rate-slider" min="-20" max="30" step="5" value="0">
+              <span id="studio-rate-value">+0%</span>
+            </div>
+            <div class="slider-group">
+              <span>శ్రుతి (Pitch):</span>
+              <input type="range" id="studio-pitch-slider" min="-10" max="10" step="2" value="0">
+              <span id="studio-pitch-value">+0Hz</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Waveform & Status Banner -->
+        <div id="studio-speaking-banner" class="studio-speaking-banner" style="display: none; margin-top: 12px;">
+          <div class="wave-anim" style="display: flex;">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+          </div>
+          <span id="studio-status-text" style="font-size: 0.84rem; color: #00E676; font-weight: 700;">
+            మైక్ ప్రకటన ప్లే అవుతోంది...
+          </span>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer Action Buttons -->
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <button type="button" class="btn-secondary" id="btn-studio-save-notice" title="ఈ ప్రకటనను విరాళాల జాబితాలో నోటీస్ రూపంలో భద్రపరచండి" style="font-size: 0.82rem;">
+          💾 లిస్ట్‌లో సేవ్ చేయండి
+        </button>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn-broadcast-secondary" id="btn-studio-play" style="padding: 9px 18px; font-size: 0.88rem;">
+            <span>🔊</span> ప్రకటన వినండి (Play)
+          </button>
+          <button type="button" class="btn-broadcast-secondary danger" id="btn-studio-stop" style="display: none; padding: 9px 18px; font-size: 0.88rem;">
+            ⏹️ ఆపండి (Stop)
+          </button>
+          <button type="button" class="btn-primary highlight-download-btn" id="btn-studio-download-mp3" style="padding: 9px 20px; font-size: 0.88rem; font-weight: 700; background: linear-gradient(135deg, #00E676, #00B0FF); color: #000;">
+            <span>⬇️</span> MP3 గా డౌన్‌లోడ్ చేయండి
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ElevenLabs AI Voice Cloning Studio Modal (సెలబ్రిటీ AI వాయిస్ క్లోనింగ్) -->
+  <div class="modal-overlay" id="voice-cloning-modal">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.3rem;">🧬</span>
+          <div>
+            <h3 style="font-size: 1.05rem; margin: 0; color: var(--color-gold-bright);">ElevenLabs AI వాయిస్ క్లోనింగ్ సెట్టింగ్స్</h3>
+            <div style="font-size: 0.72rem; color: var(--color-text-muted);">Real Celebrity Voice Cloning & Neural Telugu Text-to-Speech Engine</div>
+          </div>
+        </div>
+        <button class="btn-modal-close" id="btn-close-voice-cloning">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 18px; max-height: 75vh; overflow-y: auto;">
+        
+        <!-- Connection Status & API Key Configuration -->
+        <div class="clone-config-card">
+          <div class="clone-config-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="clone-conn-indicator" class="conn-dot-offline"></span>
+              <span id="clone-conn-text" style="font-weight: 700; font-size: 0.88rem;">ElevenLabs AI కనెక్ట్ కాలేదు</span>
+            </div>
+            <span id="clone-tier-pill" class="badge-tier" style="display: none;">Free Tier</span>
+          </div>
+
+          <div id="clone-quota-display" class="clone-quota-display" style="display: none;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.76rem; color: var(--color-gold); margin-bottom: 4px;">
+              <span>ఉచిత అక్షరాల కోటా (Character Quota):</span>
+              <span id="clone-quota-numbers">10,000 / 10,000 మిగిలి ఉన్నాయి</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="clone-quota-bar" class="progress-bar-fill" style="width: 100%;"></div>
+            </div>
+            <div style="font-size: 0.7rem; color: #81C784; margin-top: 5px;">
+              💡 <strong>ఆటోమేటిక్ క్యాషింగ్:</strong> ఒకసారి చదివిన ప్రకటన సర్వర్‌లో భద్రపరచబడుతుంది. మళ్ళీ ఎన్నిసార్లు ప్లే చేసినా లేదా డౌన్‌లోడ్ చేసినా మీ కోటా ఖర్చు కాదు!
+            </div>
+          </div>
+
+          <div class="clone-key-input-row" style="margin-top: 12px;">
+            <label style="display: block; font-size: 0.76rem; font-weight: 700; color: var(--color-gold); margin-bottom: 6px;">
+              🔑 మీ ElevenLabs API Key (xi-api-key):
+            </label>
+            <div style="display: flex; gap: 8px;">
+              <input type="password" id="input-elevenlabs-key" class="clone-input-field" placeholder="sk_... లేదా ElevenLabs API కీ ఇక్కడ పేస్ట్ చేయండి" autocomplete="off">
+              <button type="button" id="btn-save-elevenlabs-key" class="btn-primary" style="white-space: nowrap; padding: 8px 16px; font-weight: 700; font-size: 0.82rem;">
+                💾 కనెక్ట్ చేయండి
+              </button>
+              <button type="button" id="btn-clear-elevenlabs-key" class="btn-secondary danger-outline" style="display: none; white-space: nowrap; padding: 8px 12px; font-size: 0.82rem;" title="API కీ ని తొలగించండి">
+                డిస్‌కనెక్ట్
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick 1-Minute Setup Guide -->
+          <div class="clone-guide-box" style="margin-top: 12px;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--color-gold); margin-bottom: 4px;">
+              📖 1 నిమిషంలో ఉచిత ElevenLabs API కీ ఎలా పొందాలి?
+            </div>
+            <ol style="font-size: 0.73rem; color: var(--color-text-main); margin-left: 18px; line-height: 1.5;">
+              <li><a href="https://elevenlabs.io" target="_blank" rel="noopener" style="color: #00E676; font-weight: 700; text-decoration: underline;">elevenlabs.io</a> వెబ్‌సైట్‌కి వెళ్ళి ఉచితంగా సైన్-అప్ చేయండి (100% Free • నెలకు 10,000 అక్షరాలు ఉచితం).</li>
+              <li>కింద ఎడమవైపు మీ <strong>Profile Icon</strong> పై నొక్కి <strong>"API Keys"</strong> ఎంచుకోండి.</li>
+              <li>అక్కడ ఉన్న <strong>API Key</strong> ని కాపీ చేసి పైన బాక్స్‌లో పేస్ట్ చేసి <strong>"కనెక్ట్ చేయండి"</strong> నొక్కండి!</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Cloned Celebrity Voices Hub -->
+        <div style="margin-top: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h4 style="font-size: 0.88rem; color: var(--color-gold); margin: 0;">
+              🌟 సెలబ్రిటీ వాయిస్ క్లోన్స్ స్థితి (Cloned Celebrity Voices):
+            </h4>
+            <span style="font-size: 0.7rem; color: var(--color-text-muted);">
+              MP3 ఆడియోను AI వాయిస్ గా మార్చండి
+            </span>
+          </div>
+
+          <div class="cloned-voices-grid" id="modal-cloned-voices-list">
+            <!-- Populated via JS for Balayya, Baahubali, Pawan Kalyan, Chiranjeevi, Brahmanandam -->
+          </div>
+        </div>
+
+        <!-- Quick Live Voice Preview Studio -->
+        <div class="clone-test-studio-box" style="margin-top: 18px;">
+          <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-gold); margin-bottom: 6px;">
+            🎙️ క్లోన్ చేసిన వాయిస్ లైవ్ టెస్ట్ చేయండి (Test Any Telugu Text):
+          </div>
+          <textarea id="clone-test-textarea" class="clone-test-textarea" rows="2" placeholder="ఇక్కడ ఏదైనా తెలుగు టెక్స్ట్ టైప్ చేయండి...">శ్రీ వినాయక మహారాజ్ దివ్య సమక్షంలో... రామయ్య గారి కుమారుడు రమేష్ గారు 5,116 రూపాయలు విరాళం సమర్పించారు. గణపతి బప్పా మోరియా!</textarea>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 0.76rem; color: var(--color-text-muted);">సెలబ్రిటీ:</span>
+              <select id="clone-test-celeb-select" class="clone-select-field">
+                <option value="balayya">🦁 బాలయ్య మాస్</option>
+                <option value="baahubali">👑 బాహుబలి ప్రభాస్</option>
+                <option value="pawankalyan">⚡ పవన్ కళ్యాణ్</option>
+                <option value="chiranjeevi">🌟 మెగాస్టార్ చిరంజీవి</option>
+                <option value="brahmanandam">🎭 బ్రహ్మానందం కామెడీ</option>
+              </select>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" id="btn-preview-clone-speech" class="btn-broadcast-secondary" style="padding: 6px 14px; font-size: 0.8rem;">
+                <span>▶️</span> టెస్ట్ చేయండి
+              </button>
+              <button type="button" id="btn-download-clone-sample" class="btn-primary highlight-download-btn" style="padding: 6px 14px; font-size: 0.8rem; background: linear-gradient(135deg, #00E676, #00B0FF); color: #000; font-weight: 700;">
+                <span>⬇️</span> MP3 డౌన్‌లోడ్
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: flex-end;">
+        <button type="button" class="btn-secondary" id="btn-close-voice-cloning-footer">
+          ముగించండి (Close)
+        </button>
       </div>
     </div>
   </div>
@@ -727,10 +1165,10 @@
   </div>
 
   <!-- Scripts -->
-  <script src="/js/audio.js?v=9"></script>
-  <script src="/js/transliterate.js?v=9"></script>
-  <script src="/js/tts.js?v=9"></script>
-  <script src="/js/donations.js?v=9"></script>
-  <script src="/js/app.js?v=9"></script>
+  <script src="/js/audio.js?v=3.1"></script>
+  <script src="/js/transliterate.js?v=3.1"></script>
+  <script src="/js/tts.js?v=3.1"></script>
+  <script src="/js/donations.js?v=3.1"></script>
+  <script src="/js/app.js?v=3.1"></script>
 </body>
 </html>

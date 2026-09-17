@@ -134,6 +134,8 @@ body {
 .header-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .btn-header {
@@ -242,6 +244,53 @@ body {
   background: linear-gradient(135deg, rgba(216, 67, 21, 0.35), rgba(255, 179, 0, 0.2));
   color: var(--color-gold-bright);
   box-shadow: 0 0 12px rgba(255, 179, 0, 0.25);
+}
+
+.voice-persona-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.voice-radio-label.celeb-card {
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  background: rgba(40, 15, 5, 0.5);
+  border: 1px solid rgba(255, 179, 0, 0.2);
+}
+
+.voice-radio-label.celeb-card:hover {
+  border-color: var(--color-gold);
+  background: rgba(255, 179, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.voice-radio-label.celeb-card:has(input:checked) {
+  border-color: #FFD700;
+  background: linear-gradient(135deg, rgba(230, 74, 25, 0.5), rgba(255, 215, 0, 0.3));
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.35);
+}
+
+.persona-badge-pill {
+  font-size: 0.72rem;
+  color: var(--color-gold-bright);
+  background: rgba(255, 179, 0, 0.12);
+  border: 1px solid rgba(255, 179, 0, 0.3);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.tts-preset-chip.celeb-chip {
+  background: linear-gradient(135deg, rgba(255, 112, 67, 0.2), rgba(255, 179, 0, 0.25));
+  border-color: rgba(255, 179, 0, 0.45);
+  color: #FFF9C4;
+  font-weight: 600;
+}
+
+.tts-preset-chip.celeb-chip:hover {
+  background: linear-gradient(135deg, rgba(255, 112, 67, 0.4), rgba(255, 179, 0, 0.45));
+  border-color: #FFD700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
 .voice-radio-label input[type="radio"] {
@@ -1496,4 +1545,645 @@ body.select-mode-active .donor-card-checkbox {
   border-color: var(--color-gold);
 }
 
+/* ==========================================================================
+   Custom Telugu TTS Announcement Studio & MP3 Downloader Styles
+   ========================================================================== */
 
+/* Dedicated Main Dashboard TTS Feature Banner */
+.tts-feature-banner {
+  background: linear-gradient(135deg, rgba(230, 74, 25, 0.25), rgba(255, 179, 0, 0.16), rgba(26, 6, 2, 0.95));
+  border: 1.5px solid var(--color-gold);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 179, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.tts-feature-banner:hover {
+  border-color: var(--color-gold-bright);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 22px rgba(255, 179, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.tts-banner-left {
+  flex: 1;
+}
+
+.tts-banner-pill {
+  display: inline-block;
+  background: linear-gradient(135deg, #FF6F00, #E65100);
+  color: #FFF;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tts-banner-heading {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #FFFDE7;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tts-banner-sub {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.tts-banner-btn {
+  white-space: nowrap;
+  padding: 10px 18px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00E676, #00B0FF);
+  color: #000;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgba(0, 230, 118, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tts-banner-btn:hover {
+  background: linear-gradient(135deg, #69F0AE, #40C4FF);
+  transform: scale(1.03);
+}
+
+@media (max-width: 650px) {
+  .tts-feature-banner {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+    padding: 14px;
+  }
+  .tts-banner-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Header TTS Studio Button */
+.btn-header.highlight-tts {
+  background: linear-gradient(135deg, rgba(255, 179, 0, 0.25), rgba(230, 74, 25, 0.35));
+  border: 1px solid var(--color-gold-bright);
+  color: #FFF9C4;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(255, 179, 0, 0.3);
+  animation: pulse-border 2.5s infinite ease-in-out;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 179, 0, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(255, 179, 0, 0.55);
+  }
+}
+
+/* Toolbar TTS Studio Button */
+.btn-bulk-tool.highlight-tts-btn {
+  background: linear-gradient(135deg, rgba(255, 179, 0, 0.2), rgba(0, 230, 118, 0.2));
+  border-color: var(--color-gold);
+  color: #FFF9C4;
+  font-weight: 700;
+}
+
+.btn-bulk-tool.highlight-tts-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 179, 0, 0.35), rgba(0, 230, 118, 0.35));
+  border-color: #00E676;
+}
+
+/* Bulk Floating Bar MP3 Download */
+.btn-bulk-act.highlight-mp3 {
+  background: linear-gradient(135deg, #00E676, #00B0FF);
+  color: #000;
+  font-weight: 800;
+  border-color: transparent;
+}
+
+.btn-bulk-act.highlight-mp3:hover {
+  background: linear-gradient(135deg, #69F0AE, #40C4FF);
+  transform: translateY(-1px);
+}
+
+/* Custom Telugu TTS Studio Modal */
+.tts-preset-section {
+  background: rgba(255, 179, 0, 0.06);
+  border: 1px solid rgba(255, 179, 0, 0.2);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.tts-presets-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.tts-preset-chip {
+  font-size: 0.76rem;
+  padding: 5px 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 179, 0, 0.3);
+  color: #FFF8E1;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tts-preset-chip:hover {
+  background: rgba(255, 179, 0, 0.25);
+  border-color: var(--color-gold-bright);
+  color: #FFF;
+  transform: translateY(-1px);
+}
+
+.btn-translit-studio-toggle {
+  background: rgba(0, 230, 118, 0.1);
+  border: 1px solid rgba(0, 230, 118, 0.4);
+  color: #FFF;
+  font-size: 0.74rem;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-translit-studio-toggle:hover {
+  background: rgba(0, 230, 118, 0.2);
+  border-color: #00E676;
+}
+
+.custom-tts-textarea {
+  min-height: 120px;
+  resize: vertical;
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.tts-voice-tuning-deck {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 179, 0, 0.2);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.studio-speaking-banner {
+  background: rgba(0, 230, 118, 0.12);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.highlight-download-btn {
+  box-shadow: 0 4px 14px rgba(0, 230, 118, 0.35);
+  transition: all 0.2s ease;
+}
+
+.highlight-download-btn:hover {
+  box-shadow: 0 6px 20px rgba(0, 230, 118, 0.55);
+  transform: translateY(-1px);
+}
+
+/* Card MP3 download button */
+.btn-action.btn-download {
+  background: rgba(0, 230, 118, 0.12);
+  border-color: rgba(0, 230, 118, 0.4);
+  color: #00E676;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+
+.btn-action.btn-download:hover {
+  background: rgba(0, 230, 118, 0.25);
+  border-color: #00E676;
+  color: #B9F6CA;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 230, 118, 0.3);
+}
+
+.btn-action.btn-download.loading {
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* Authentic Celebrity Audio Clip Box */
+.celeb-clip-control-box {
+  background: linear-gradient(135deg, rgba(255, 111, 0, 0.12), rgba(61, 10, 2, 0.35));
+  border: 1.5px solid var(--color-gold);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  animation: fadeIn 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.celeb-clip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.celeb-clip-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-gold-bright);
+}
+
+.celeb-clip-badge {
+  background: var(--color-gold);
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.celeb-clip-quote {
+  font-size: 0.82rem;
+  font-style: italic;
+  color: #FFF8E1;
+  background: rgba(0, 0, 0, 0.35);
+  border-left: 3px solid var(--color-gold-bright);
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.celeb-clip-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.btn-celeb-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-celeb-action.play {
+  background: linear-gradient(135deg, #FF9100, #E65100);
+  color: #FFF;
+  border-color: var(--color-gold-bright);
+}
+.btn-celeb-action.play:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.btn-celeb-action.upload {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-gold);
+  border-color: rgba(255, 179, 0, 0.4);
+}
+.btn-celeb-action.upload:hover {
+  background: rgba(255, 179, 0, 0.2);
+  color: #FFF;
+  transform: translateY(-1px);
+}
+
+.btn-celeb-action.reset {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-muted);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.btn-celeb-action.reset:hover {
+  color: #FF8A80;
+  border-color: #FF5252;
+}
+
+.studio-celeb-box {
+  background: rgba(255, 179, 0, 0.08);
+  border: 1px dashed var(--color-gold);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+}
+
+.btn-xs-gold {
+  background: var(--color-gold);
+  color: #000;
+  border: none;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.btn-xs-gold:hover {
+  transform: scale(1.04);
+}
+
+/* ==========================================================================
+   ElevenLabs AI Voice Cloning Styles
+   ========================================================================== */
+
+.highlight-clone {
+  background: linear-gradient(135deg, rgba(0, 230, 118, 0.2), rgba(0, 176, 255, 0.2)) !important;
+  border-color: #00E676 !important;
+  color: #00E676 !important;
+  font-weight: 700 !important;
+}
+.highlight-clone:hover {
+  background: linear-gradient(135deg, rgba(0, 230, 118, 0.35), rgba(0, 176, 255, 0.35)) !important;
+  box-shadow: 0 0 12px rgba(0, 230, 118, 0.4);
+}
+
+.clone-status-pill {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.clone-status-pill.active {
+  background: rgba(0, 230, 118, 0.2);
+  color: #00E676;
+  border: 1px solid #00E676;
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.25);
+}
+.clone-status-pill.unconfigured {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.celeb-clone-panel {
+  background: rgba(0, 230, 118, 0.06);
+  border: 1px solid rgba(0, 230, 118, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.celeb-clone-panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #00E676;
+  margin-bottom: 4px;
+}
+
+.btn-link-gold {
+  background: transparent;
+  border: none;
+  color: var(--color-gold-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 2px 4px;
+}
+.btn-link-gold:hover {
+  color: #FFF;
+}
+
+.celeb-clone-explainer {
+  font-size: 0.74rem;
+  color: #DCEDC8;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.celeb-clone-actions-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.btn-celeb-action.clone-hero {
+  background: linear-gradient(135deg, #00C853, #0091EA);
+  color: #FFF;
+  border-color: #00E676;
+  box-shadow: 0 2px 8px rgba(0, 200, 83, 0.35);
+}
+.btn-celeb-action.clone-hero:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 200, 83, 0.5);
+}
+
+.btn-celeb-action.test-clone {
+  background: rgba(0, 230, 118, 0.15);
+  color: #00E676;
+  border-color: #00E676;
+}
+.btn-celeb-action.test-clone:hover {
+  background: rgba(0, 230, 118, 0.28);
+}
+
+.btn-celeb-action.delete-clone {
+  background: rgba(255, 82, 82, 0.15);
+  color: #FF5252;
+  border-color: #FF5252;
+}
+.btn-celeb-action.delete-clone:hover {
+  background: rgba(255, 82, 82, 0.25);
+}
+
+.celeb-audio-clip-panel {
+  background: rgba(255, 179, 0, 0.04);
+  border-top: 1px dashed rgba(255, 179, 0, 0.2);
+  padding-top: 8px;
+}
+
+/* Voice Cloning Modal Components */
+.clone-config-card {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+
+.clone-config-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.conn-dot-online {
+  width: 10px;
+  height: 10px;
+  background-color: #00E676;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 8px #00E676;
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+.conn-dot-offline {
+  width: 10px;
+  height: 10px;
+  background-color: #757575;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.badge-tier {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #FFB300, #E65100);
+  color: #000;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00E676, #00B0FF);
+  transition: width 0.4s ease;
+}
+
+.clone-input-field {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #FFF;
+  font-size: 0.82rem;
+  outline: none;
+}
+.clone-input-field:focus {
+  border-color: #00E676;
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.3);
+}
+
+.clone-guide-box {
+  background: rgba(255, 179, 0, 0.05);
+  border-left: 3px solid var(--color-gold);
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.cloned-voices-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cloned-voice-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: all 0.2s ease;
+}
+.cloned-voice-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 179, 0, 0.3);
+}
+
+.cloned-voice-row.active-clone {
+  border-color: rgba(0, 230, 118, 0.4);
+  background: rgba(0, 230, 118, 0.04);
+}
+
+.cloned-voice-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cloned-voice-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #FFF;
+}
+
+.cloned-voice-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.clone-test-studio-box {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.clone-test-textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: #FFF;
+  padding: 8px 10px;
+  font-size: 0.84rem;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.clone-select-field {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-gold);
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}

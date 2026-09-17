@@ -188,11 +188,548 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // 1. Setup Voice & Audio Controls
-  voiceMohanRadio.addEventListener('change', () => {
-    tts.selectedVoice = 'te-IN-MohanNeural';
+  const personaRadios = document.querySelectorAll('input[name="voiceSelect"]');
+  const activePersonaBadge = document.getElementById('active-persona-badge');
+  const toggleCelebrityDialogues = document.getElementById('toggle-celebrity-dialogues');
+  const celebControlBox = document.getElementById('celeb-clip-control-box');
+  const celebClipBadge = document.getElementById('celeb-clip-badge');
+  const celebClipQuote = document.getElementById('celeb-clip-quote');
+  const btnPlayCelebClip = document.getElementById('btn-play-celeb-clip');
+  const btnUploadCelebClip = document.getElementById('btn-upload-celeb-clip');
+  const btnResetCelebClip = document.getElementById('btn-reset-celeb-clip');
+  const inputCelebFile = document.getElementById('input-celeb-file');
+
+  const CELEB_INFOS = {
+    'balayya': {
+      badge: '🦁 బాలయ్య మాస్ డైలాగ్',
+      quote: '"జై బాలయ్య! దెబ్బకు దయ్యం వదలాలి... మైక్ మోత మోగిపోవాలి! ఫ్లూట్ జింక ముందు ఊదు... సింహం ముందు కాదు! జై బాలయ్య!"'
+    },
+    'baahubali': {
+      badge: '👑 బాహుబలి రాయల్ డైలాగ్',
+      quote: '"శ్రీ వినాయక మహారాజ్ దివ్య సమక్షంలో... అమరేంద్ర బాహుబలి అను నేను... స్వామివారి భక్తులకు సర్వదా శుభం కలగాలని ఆకాంక్షిస్తున్నాను! జై గణపతి దేవా!"'
+    },
+    'pawankalyan': {
+      badge: '⚡ పవన్ కళ్యాణ్ పవర్ పంచ్',
+      quote: '"భక్తజనులందరికీ నా హృదయపూర్వక నమస్కారాలు! మనం చేసే ప్రతి మంచి సంకల్పంలో వినాయక స్వామి వారి ఆశీస్సులు ఉంటాయి... జై హింద్! బోలో గణపతి బప్పా మోరియా!"'
+    },
+    'chiranjeevi': {
+      badge: '🌟 మెగాస్టార్ చిరంజీవి డైలాగ్',
+      quote: '"నమస్తే అండీ... మీ చిరంజీవిని. మన వినాయక చవితి పందిరిలో... మీ కుటుంబాలన్నీ ఆయురారోగ్య ఐశ్వర్యాలతో సదా సంతోషంగా వర్ధిల్లాలని మనసారా కోరుకుంటున్నాను. గణపతి మహారాజ్ కి జై!"'
+    },
+    'brahmanandam': {
+      badge: '🎭 బ్రహ్మానందం కామెడీ డైలాగ్',
+      quote: '"ఆహా... ఏమి భక్తి! ఏమి చందా! నేనండి మీ ఖాన్ దాదా... కాదు కాదు, మన వినాయక భక్తుడుని! ఆనందో బ్రహ్మ! బోలో గణపతి బప్పా మోరియా!"'
+    }
+  };
+
+  // Voice Cloning DOM Elements
+  const celebCloneStatusPill = document.getElementById('celeb-clone-status-pill');
+  const btnTriggerVoiceClone = document.getElementById('btn-trigger-voice-clone');
+  const btnTriggerCloneText = document.getElementById('btn-trigger-clone-text');
+  const btnTestClonedAudio = document.getElementById('btn-test-cloned-audio');
+  const btnDeleteCurrentClone = document.getElementById('btn-delete-current-clone');
+  const toggleUseVoiceClone = document.getElementById('toggle-use-voice-clone');
+  const btnOpenVoiceCloning = document.getElementById('btn-open-voice-cloning');
+  const btnOpenCloneSettingsLink = document.getElementById('btn-open-clone-settings-link');
+  const voiceCloningModal = document.getElementById('voice-cloning-modal');
+  const btnCloseVoiceCloning = document.getElementById('btn-close-voice-cloning');
+  const btnCloseVoiceCloningFooter = document.getElementById('btn-close-voice-cloning-footer');
+  const cloneConnIndicator = document.getElementById('clone-conn-indicator');
+  const cloneConnText = document.getElementById('clone-conn-text');
+  const cloneTierPill = document.getElementById('clone-tier-pill');
+  const cloneQuotaDisplay = document.getElementById('clone-quota-display');
+  const cloneQuotaNumbers = document.getElementById('clone-quota-numbers');
+  const cloneQuotaBar = document.getElementById('clone-quota-bar');
+  const inputElevenlabsKey = document.getElementById('input-elevenlabs-key');
+  const btnSaveElevenlabsKey = document.getElementById('btn-save-elevenlabs-key');
+  const btnClearElevenlabsKey = document.getElementById('btn-clear-elevenlabs-key');
+  const modalClonedVoicesList = document.getElementById('modal-cloned-voices-list');
+  const cloneTestTextarea = document.getElementById('clone-test-textarea');
+  const cloneTestCelebSelect = document.getElementById('clone-test-celeb-select');
+  const btnPreviewCloneSpeech = document.getElementById('btn-preview-clone-speech');
+  const btnDownloadCloneSample = document.getElementById('btn-download-clone-sample');
+
+  // Hidden file input for uploading MP3 to clone voice
+  let inputCloneFile = document.getElementById('input-clone-file');
+  if (!inputCloneFile) {
+    inputCloneFile = document.createElement('input');
+    inputCloneFile.type = 'file';
+    inputCloneFile.id = 'input-clone-file';
+    inputCloneFile.accept = 'audio/*';
+    inputCloneFile.style.display = 'none';
+    document.body.appendChild(inputCloneFile);
+  }
+
+  function updateMainVoicePersona(personaKey) {
+    const isCeleb = (personaKey !== 'mohan' && personaKey !== 'shruti');
+    const includeClips = isCeleb ? (toggleCelebrityDialogues ? toggleCelebrityDialogues.checked : true) : false;
+    const persona = tts.setPersona(personaKey, includeClips);
+    if (persona && activePersonaBadge) {
+      activePersonaBadge.textContent = persona.name;
+    }
+    // Update rate slider to match persona
+    if (persona && rateSlider && rateValueLabel) {
+      const rateVal = parseInt(persona.rate) || 0;
+      rateSlider.value = rateVal;
+      rateValueLabel.textContent = (rateVal >= 0 ? '+' : '') + rateVal + '%';
+    }
+
+    if (celebControlBox) {
+      if (isCeleb) {
+        celebControlBox.style.display = 'block';
+        const info = CELEB_INFOS[personaKey] || { badge: persona.name, quote: persona.intro || '' };
+        if (celebClipBadge) celebClipBadge.textContent = info.badge;
+        if (celebClipQuote) celebClipQuote.textContent = info.quote;
+
+        // Update Voice Cloning UI status
+        updateCelebCloneUIStatus(personaKey);
+      } else {
+        celebControlBox.style.display = 'none';
+      }
+    }
+  }
+
+  function updateCelebCloneUIStatus(personaKey) {
+    if (!celebCloneStatusPill) return;
+    const isCloned = tts.isCelebrityCloned(personaKey);
+    const hasKey = tts.hasVoiceCloningApiKey;
+
+    if (isCloned) {
+      celebCloneStatusPill.className = 'clone-status-pill active';
+      celebCloneStatusPill.textContent = '✨ AI వాయిస్ క్లోన్ యాక్టివ్!';
+      if (btnTriggerCloneText) btnTriggerCloneText.textContent = '🔄 కొత్త MP3తో రీ-క్లోన్ చేయండి';
+      if (btnTestClonedAudio) btnTestClonedAudio.style.display = 'inline-flex';
+      if (btnDeleteCurrentClone) btnDeleteCurrentClone.style.display = 'inline-flex';
+    } else if (hasKey) {
+      celebCloneStatusPill.className = 'clone-status-pill unconfigured';
+      celebCloneStatusPill.textContent = '⚪ AI క్లోన్ చేయలేదు';
+      if (btnTriggerCloneText) btnTriggerCloneText.textContent = '🧬 ఈ MP3 నుండి AI వాయిస్ క్లోన్ చేయండి';
+      if (btnTestClonedAudio) btnTestClonedAudio.style.display = 'none';
+      if (btnDeleteCurrentClone) btnDeleteCurrentClone.style.display = 'none';
+    } else {
+      celebCloneStatusPill.className = 'clone-status-pill unconfigured';
+      celebCloneStatusPill.textContent = '🔑 ElevenLabs API కీ అవసరం';
+      if (btnTriggerCloneText) btnTriggerCloneText.textContent = '🧬 AI వాయిస్ క్లోనింగ్ సెటప్ చేయండి';
+      if (btnTestClonedAudio) btnTestClonedAudio.style.display = 'none';
+      if (btnDeleteCurrentClone) btnDeleteCurrentClone.style.display = 'none';
+    }
+  }
+
+  personaRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (radio.checked) {
+        updateMainVoicePersona(radio.value);
+      }
+    });
   });
-  voiceShrutiRadio.addEventListener('change', () => {
-    tts.selectedVoice = 'te-IN-ShrutiNeural';
+
+  if (toggleCelebrityDialogues) {
+    toggleCelebrityDialogues.checked = tts.includeCelebrityDialogues;
+  }
+
+  toggleCelebrityDialogues?.addEventListener('change', (e) => {
+    tts.includeCelebrityDialogues = e.target.checked;
+    localStorage.setItem('vinayaka_include_celeb_dialogues', e.target.checked ? 'true' : 'false');
+  });
+
+  toggleUseVoiceClone?.addEventListener('change', (e) => {
+    tts.useVoiceClone = e.target.checked;
+  });
+
+  // Authentic celebrity clip playback and custom upload
+  let isCelebClipPlaying = false;
+  btnPlayCelebClip?.addEventListener('click', async () => {
+    if (isCelebClipPlaying) {
+      tts.stop();
+      isCelebClipPlaying = false;
+      btnPlayCelebClip.querySelector('span:last-child').textContent = 'డైలాగ్ వినండి (Play)';
+      btnPlayCelebClip.querySelector('.btn-icon').textContent = '▶️';
+      return;
+    }
+
+    try {
+      isCelebClipPlaying = true;
+      btnPlayCelebClip.querySelector('span:last-child').textContent = 'ఆగు (Stop)';
+      btnPlayCelebClip.querySelector('.btn-icon').textContent = '⏹️';
+
+      await tts.playCelebrityClip(tts.selectedPersona);
+    } catch (e) {
+      console.warn("Celebrity clip play error:", e);
+    } finally {
+      isCelebClipPlaying = false;
+      btnPlayCelebClip.querySelector('span:last-child').textContent = 'డైలాగ్ వినండి (Play)';
+      btnPlayCelebClip.querySelector('.btn-icon').textContent = '▶️';
+    }
+  });
+
+  btnUploadCelebClip?.addEventListener('click', () => {
+    inputCelebFile?.click();
+  });
+
+  inputCelebFile?.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const labelSpan = btnUploadCelebClip?.querySelector('span:last-child') || btnUploadCelebClip;
+    const iconSpan = btnUploadCelebClip?.querySelector('.btn-icon');
+
+    try {
+      if (btnUploadCelebClip) {
+        btnUploadCelebClip.disabled = true;
+        btnUploadCelebClip.style.opacity = '0.7';
+      }
+      if (iconSpan) iconSpan.textContent = '⏳';
+      if (labelSpan) labelSpan.textContent = 'అప్‌లోడ్ అవుతోంది...';
+
+      await tts.uploadCelebrityClip(tts.selectedPersona, file);
+      showToastNotification(`✅ ${file.name} విజయవంతంగా అప్‌లోడ్ చేయబడింది! మీ సెలబ్రిటీ వాయిస్ అప్‌డేట్ అయింది.`);
+      // Preview the newly uploaded clip
+      tts.playCelebrityClip(tts.selectedPersona);
+
+      // Offer to clone if ElevenLabs API key is connected
+      if (tts.hasVoiceCloningApiKey) {
+        if (confirm(`ఈ అప్‌లోడ్ చేసిన MP3 నుండి ${tts.selectedPersona} స్వరాన్ని ElevenLabs AI లో క్లోన్ చేయమంటారా? (ఇకపై భక్తుల పేర్లు అన్నీ ఈ స్వరంలోనే చదువుతుంది)`)) {
+          startVoiceCloneFlow(tts.selectedPersona, file);
+        }
+      }
+    } catch (err) {
+      console.error("Celebrity clip upload error:", err);
+      alert(`అప్‌లోడ్ లోపం: ${err.message}`);
+    } finally {
+      if (btnUploadCelebClip) {
+        btnUploadCelebClip.disabled = false;
+        btnUploadCelebClip.style.opacity = '1';
+      }
+      if (iconSpan) iconSpan.textContent = '📁';
+      if (labelSpan) labelSpan.textContent = 'రియల్ MP3 అప్‌లోడ్ చేయండి';
+      inputCelebFile.value = '';
+    }
+  });
+
+  btnResetCelebClip?.addEventListener('click', async () => {
+    if (!confirm('ఈ సెలబ్రిటీకి ఒరిజినల్ డిఫాల్ట్ ఆడియోని పునరుద్ధరించాలా? (Reset default audio?)')) return;
+    try {
+      await tts.resetCelebrityClip(tts.selectedPersona);
+      showToastNotification('డిఫాల్ట్ ఆడియో పునరుద్ధరించబడింది!');
+      tts.playCelebrityClip(tts.selectedPersona);
+    } catch (err) {
+      alert(`రీసెట్ లోపం: ${err.message}`);
+    }
+  });
+
+  // Voice Cloning Action Handlers
+  async function startVoiceCloneFlow(celebId, file = null) {
+    if (!tts.hasVoiceCloningApiKey) {
+      openVoiceCloningModal();
+      showToastNotification("ℹ️ దయచేసి ముందుగా మీ ఉచిత ElevenLabs API Key ని నమోదు చేయండి.");
+      inputElevenlabsKey?.focus();
+      return;
+    }
+
+    if (!file) {
+      // Prompt user: use current server file or choose a new file
+      const chooseNew = confirm(`మీ ఫోన్/కంప్యూటర్ నుండి కొత్త MP3 ఎంచుకోవాలా?\n(రద్దు చేస్తే సర్వర్‌లో ఇప్పటికే ఉన్న MP3 నుండి క్లోన్ చేస్తుంది)`);
+      if (chooseNew) {
+        inputCloneFile.onchange = async (ev) => {
+          const selectedFile = ev.target.files && ev.target.files[0];
+          if (selectedFile) {
+            await executeVoiceCloning(celebId, selectedFile);
+          }
+          inputCloneFile.value = '';
+        };
+        inputCloneFile.click();
+        return;
+      }
+    }
+
+    await executeVoiceCloning(celebId, file);
+  }
+
+  async function executeVoiceCloning(celebId, file = null) {
+    const origText = btnTriggerCloneText ? btnTriggerCloneText.textContent : '';
+    try {
+      if (btnTriggerVoiceClone) {
+        btnTriggerVoiceClone.disabled = true;
+        btnTriggerVoiceClone.style.opacity = '0.75';
+      }
+      if (btnTriggerCloneText) {
+        btnTriggerCloneText.textContent = '⏳ AI వాయిస్ క్లోన్ అవుతోంది (10-25 సెకన్లు)...';
+      }
+      showToastNotification("🧬 ElevenLabs AI ద్వారా వాయిస్ మోడల్ సిద్ధమవుతోంది... దయచేసి వేచి ఉండండి.");
+
+      const info = CELEB_INFOS[celebId];
+      const celebName = info ? info.badge : `Celebrity ${celebId}`;
+      await tts.cloneCelebrityVoice(celebId, file, celebName);
+
+      showToastNotification(`🎉 అద్భుతం! ${celebName} వాయిస్ విజయవంతంగా క్లోన్ చేయబడింది! ఇకపై భక్తుల ప్రకటనలు మొత్తం ఈ స్వరంలోనే చదువుతుంది!`);
+      updateCelebCloneUIStatus(celebId);
+      refreshVoiceCloningModalList();
+
+      // Automatically test the newly cloned voice with a celebratory sample
+      const sampleText = `శ్రీ వినాయక మహారాజ్ దివ్య సమక్షంలో... రామయ్య గారి కుమారుడు రమేష్ గారు 5,116 రూపాయలు విరాళం సమర్పించారు. గణపతి బప్పా మోరియా!`;
+      await tts.speak(sampleText, { useClone: true, celebId: celebId });
+    } catch (err) {
+      console.error("executeVoiceCloning error:", err);
+      alert(`వాయిస్ క్లోనింగ్ గమనిక:\n\n${err.message}`);
+      showToastNotification(`⚠️ ${err.message}`);
+    } finally {
+      if (btnTriggerVoiceClone) {
+        btnTriggerVoiceClone.disabled = false;
+        btnTriggerVoiceClone.style.opacity = '1';
+      }
+      updateCelebCloneUIStatus(celebId);
+    }
+  }
+
+  btnTriggerVoiceClone?.addEventListener('click', () => {
+    startVoiceCloneFlow(tts.selectedPersona);
+  });
+
+  btnTestClonedAudio?.addEventListener('click', async () => {
+    try {
+      const sampleText = `శ్రీ వినాయక మహారాజ్ దివ్య సమక్షంలో... రామయ్య గారి కుమారుడు రమేష్ గారు 5,116 రూపాయలు విరాళం సమర్పించారు. గణపతి బప్పా మోరియా!`;
+      showToastNotification("🔊 అసలైన సెలబ్రిటీ డైలాగ్ + తెలుగు AI విరాళం ప్రకటన ప్లే అవుతోంది...");
+      await tts.speak(sampleText, {
+        useClone: true,
+        celebId: tts.selectedPersona,
+        celebIntro: tts.includeCelebrityDialogues ? tts.selectedPersona : null
+      });
+    } catch (err) {
+      alert(`టెస్ట్ ఆడియో లోపం: ${err.message}`);
+    }
+  });
+
+  btnDeleteCurrentClone?.addEventListener('click', async () => {
+    if (!confirm(`ఈ సెలబ్రిటీ (${tts.selectedPersona}) క్లోన్ చేసిన AI వాయిస్‌ను తొలగించాలా?`)) return;
+    try {
+      await tts.deleteClonedVoice(tts.selectedPersona);
+      showToastNotification("క్లోన్ వాయిస్ తొలగించబడింది.");
+      updateCelebCloneUIStatus(tts.selectedPersona);
+      refreshVoiceCloningModalList();
+    } catch (err) {
+      alert(`డిలీట్ లోపం: ${err.message}`);
+    }
+  });
+
+  // Modal open / close handlers
+  function openVoiceCloningModal() {
+    if (voiceCloningModal) {
+      voiceCloningModal.classList.add('active');
+      refreshVoiceCloningModalState();
+    }
+  }
+
+  function closeVoiceCloningModal() {
+    if (voiceCloningModal) {
+      voiceCloningModal.classList.remove('active');
+    }
+  }
+
+  btnOpenVoiceCloning?.addEventListener('click', openVoiceCloningModal);
+  btnOpenCloneSettingsLink?.addEventListener('click', openVoiceCloningModal);
+  btnCloseVoiceCloning?.addEventListener('click', closeVoiceCloningModal);
+  btnCloseVoiceCloningFooter?.addEventListener('click', closeVoiceCloningModal);
+  voiceCloningModal?.addEventListener('click', (e) => {
+    if (e.target === voiceCloningModal) closeVoiceCloningModal();
+  });
+
+  async function refreshVoiceCloningModalState() {
+    const config = await tts.fetchVoiceCloningConfig();
+    const hasKey = Boolean(config && config.hasApiKey);
+    const sub = config ? config.subscription : null;
+
+    if (hasKey) {
+      if (cloneConnIndicator) cloneConnIndicator.className = 'conn-dot-online';
+      if (cloneConnText) {
+        cloneConnText.textContent = 'ElevenLabs AI కనెక్ట్ అయింది ✓';
+        cloneConnText.style.color = '#00E676';
+      }
+      if (btnClearElevenlabsKey) btnClearElevenlabsKey.style.display = 'inline-block';
+      if (inputElevenlabsKey && config.maskedKey) {
+        inputElevenlabsKey.value = config.maskedKey;
+      }
+      if (sub && cloneTierPill) {
+        cloneTierPill.style.display = 'inline-block';
+        cloneTierPill.textContent = (sub.tier || 'Free') + ' Tier';
+      }
+      if (sub && cloneQuotaDisplay) {
+        cloneQuotaDisplay.style.display = 'block';
+        const limit = sub.character_limit || 10000;
+        const used = sub.character_count || 0;
+        const remaining = Math.max(0, limit - used);
+        const pct = Math.max(0, Math.min(100, (remaining / limit) * 100));
+        if (cloneQuotaNumbers) {
+          cloneQuotaNumbers.textContent = `${remaining.toLocaleString()} / ${limit.toLocaleString()} అక్షరాలు మిగిలి ఉన్నాయి`;
+        }
+        if (cloneQuotaBar) {
+          cloneQuotaBar.style.width = `${pct}%`;
+        }
+      }
+    } else {
+      if (cloneConnIndicator) cloneConnIndicator.className = 'conn-dot-offline';
+      if (cloneConnText) {
+        cloneConnText.textContent = 'ElevenLabs AI కనెక్ట్ కాలేదు';
+        cloneConnText.style.color = 'var(--color-text-main)';
+      }
+      if (btnClearElevenlabsKey) btnClearElevenlabsKey.style.display = 'none';
+      if (cloneTierPill) cloneTierPill.style.display = 'none';
+      if (cloneQuotaDisplay) cloneQuotaDisplay.style.display = 'none';
+    }
+
+    refreshVoiceCloningModalList();
+  }
+
+  function refreshVoiceCloningModalList() {
+    if (!modalClonedVoicesList) return;
+    modalClonedVoicesList.innerHTML = '';
+
+    const celebList = [
+      { id: 'balayya', name: '🦁 బాలయ్య మాస్ (Balakrishna)', badge: 'మాస్ పంచ్ స్టైల్' },
+      { id: 'baahubali', name: '👑 బాహుబలి ప్రభాస్ (Prabhas)', badge: 'రాయల్ బేస్ స్వరం' },
+      { id: 'pawankalyan', name: '⚡ పవన్ కళ్యాణ్ (Pawan Kalyan)', badge: 'పవర్ పంచ్ స్పీచ్' },
+      { id: 'chiranjeevi', name: '🌟 మెగాస్టార్ చిరంజీవి (Chiranjeevi)', badge: 'రాయల్ బారిటోన్' },
+      { id: 'brahmanandam', name: '🎭 బ్రహ్మానందం (Brahmanandam)', badge: 'కామెడీ కింగ్' }
+    ];
+
+    celebList.forEach(c => {
+      const isCloned = tts.isCelebrityCloned(c.id);
+      const row = document.createElement('div');
+      row.className = `cloned-voice-row ${isCloned ? 'active-clone' : ''}`;
+      row.innerHTML = `
+        <div class="cloned-voice-info">
+          <div>
+            <div class="cloned-voice-name">${c.name}</div>
+            <div style="font-size: 0.7rem; color: var(--color-text-muted); margin-top: 2px;">
+              ${isCloned ? '<span style="color: #00E676; font-weight: 700;">✨ AI క్లోన్ రెడీ (చదివే టెక్స్ట్ ఈ స్వరంలో వస్తుంది)</span>' : '⚪ AI క్లోన్ చేయలేదు (Edge TTS మోహన్ వాడుతుంది)'}
+            </div>
+          </div>
+        </div>
+        <div class="cloned-voice-actions">
+          ${isCloned ? `
+            <button type="button" class="btn-xs-gold btn-test-modal-clone" data-id="${c.id}" title="ఈ క్లోన్ స్వరంతో శాంపిల్ వినండి">
+              ▶️ టెస్ట్
+            </button>
+            <button type="button" class="btn-celeb-action clone-hero btn-reclone-modal" data-id="${c.id}" style="padding: 4px 10px; font-size: 0.72rem;" title="కొత్త MP3 తో రీ-క్లోన్ చేయండి">
+              🔄 రీ-క్లోన్
+            </button>
+            <button type="button" class="btn-celeb-action delete-clone btn-del-modal-clone" data-id="${c.id}" style="padding: 4px 8px; font-size: 0.72rem;" title="ఈ క్లోన్ తొలగించండి">
+              🗑️
+            </button>
+          ` : `
+            <button type="button" class="btn-celeb-action clone-hero btn-clone-modal-voice" data-id="${c.id}" style="padding: 5px 12px; font-size: 0.74rem;" title="MP3 తో వాయిస్ క్లోన్ చేయండి">
+              🧬 క్లోన్ చేయండి
+            </button>
+          `}
+        </div>
+      `;
+      modalClonedVoicesList.appendChild(row);
+    });
+
+    // Wire action buttons inside modal
+    modalClonedVoicesList.querySelectorAll('.btn-clone-modal-voice, .btn-reclone-modal').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        startVoiceCloneFlow(id);
+      });
+    });
+
+    modalClonedVoicesList.querySelectorAll('.btn-test-modal-clone').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        const sampleText = `శ్రీ వినాయక మహారాజ్ దివ్య సమక్షంలో... రామయ్య గారి కుమారుడు రమేష్ గారు 5,116 రూపాయలు విరాళం సమర్పించారు. గణపతి బప్పా మోరియా!`;
+        showToastNotification(`🔊 ${id} క్లోన్ చేసిన స్వరంతో విరాళం ప్రకటన ప్లే అవుతోంది...`);
+        await tts.speak(sampleText, { useClone: true, celebId: id });
+      });
+    });
+
+    modalClonedVoicesList.querySelectorAll('.btn-del-modal-clone').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        if (!confirm(`ఈ సెలబ్రిటీ (${id}) క్లోన్ AI వాయిస్‌ను తొలగించాలా?`)) return;
+        try {
+          await tts.deleteClonedVoice(id);
+          showToastNotification("క్లోన్ వాయిస్ తొలగించబడింది.");
+          refreshVoiceCloningModalList();
+          updateCelebCloneUIStatus(tts.selectedPersona);
+        } catch (err) {
+          alert(`డిలీట్ లోపం: ${err.message}`);
+        }
+      });
+    });
+  }
+
+  // Save ElevenLabs API Key
+  btnSaveElevenlabsKey?.addEventListener('click', async () => {
+    const key = (inputElevenlabsKey?.value || '').trim();
+    if (!key) {
+      alert("దయచేసి మీ ElevenLabs API Key ని నమోదు చేయండి.");
+      return;
+    }
+
+    try {
+      btnSaveElevenlabsKey.disabled = true;
+      btnSaveElevenlabsKey.textContent = 'ధృవీకరిస్తోంది...';
+      const res = await tts.saveVoiceCloningApiKey(key);
+      showToastNotification(`✅ ElevenLabs API కీ విజయవంతంగా కనెక్ట్ అయింది! (${res.tier || 'Free'} Tier)`);
+      await refreshVoiceCloningModalState();
+      updateCelebCloneUIStatus(tts.selectedPersona);
+    } catch (err) {
+      alert(`API Key ధృవీకరణ విఫలమైంది: ${err.message}`);
+    } finally {
+      btnSaveElevenlabsKey.disabled = false;
+      btnSaveElevenlabsKey.textContent = '💾 కనెక్ట్ చేయండి';
+    }
+  });
+
+  // Clear ElevenLabs API Key
+  btnClearElevenlabsKey?.addEventListener('click', async () => {
+    if (!confirm("ElevenLabs API Key ని తొలగించి డిస్‌కనెక్ట్ చేయాలా?")) return;
+    try {
+      await tts.saveVoiceCloningApiKey('');
+      if (inputElevenlabsKey) inputElevenlabsKey.value = '';
+      showToastNotification("ElevenLabs API కీ తొలగించబడింది.");
+      await refreshVoiceCloningModalState();
+      updateCelebCloneUIStatus(tts.selectedPersona);
+    } catch (err) {
+      alert(`లోపం: ${err.message}`);
+    }
+  });
+
+  // Modal Voice Synthesizer Preview & Download
+  btnPreviewCloneSpeech?.addEventListener('click', async () => {
+    const text = (cloneTestTextarea?.value || '').trim();
+    const celebId = cloneTestCelebSelect?.value || 'balayya';
+    if (!text) {
+      alert("టెక్స్ట్ నమోదు చేయండి.");
+      return;
+    }
+    try {
+      showToastNotification(`🔊 ${celebId} స్వరంలో ప్లే అవుతోంది...`);
+      await tts.speak(text, { useClone: true, celebId: celebId });
+    } catch (err) {
+      alert(`ప్లే లోపం: ${err.message}`);
+    }
+  });
+
+  btnDownloadCloneSample?.addEventListener('click', async () => {
+    const text = (cloneTestTextarea?.value || '').trim();
+    const celebId = cloneTestCelebSelect?.value || 'balayya';
+    if (!text) {
+      alert("టెక్స్ట్ నమోదు చేయండి.");
+      return;
+    }
+    try {
+      showToastNotification(`⏳ MP3 ఆడియో సిద్ధమవుతోంది...`);
+      await tts.downloadMp3(text, `వినాయక_శాంపిల్_${celebId}.mp3`, { useClone: true, celebId: celebId });
+      showToastNotification("✅ MP3 విజయవంతంగా డౌన్‌లోడ్ చేయబడింది!");
+    } catch (err) {
+      alert(`డౌన్‌లోడ్ లోపం: ${err.message}`);
+    }
+  });
+
+  // Also fetch initial voice cloning config on page load
+  tts.fetchVoiceCloningConfig().then(() => {
+    updateCelebCloneUIStatus(tts.selectedPersona);
   });
 
   rateSlider.addEventListener('input', (e) => {
@@ -330,8 +867,8 @@ document.addEventListener('DOMContentLoaded', async () => {
               <button class="btn-action btn-announce" data-action="announce" data-id="${d.id}" title="ఈ విరాళాన్ని మైక్ లో ప్రకటించండి">
                 <span class="btn-icon">📢</span> ప్రకటించండి
               </button>
-              <button class="btn-action btn-download" data-action="download" data-id="${d.id}" title="ఆడియో డౌన్‌లోడ్ చేయండి">
-                ⬇️
+              <button class="btn-action btn-download" data-action="download" data-id="${d.id}" title="ఈ విరాళం మైక్ ఆడియోను MP3 గా డౌన్‌లోడ్ చేయండి">
+                <span class="btn-icon">⬇️</span> MP3
               </button>
               <button class="btn-action btn-edit" data-action="edit" data-id="${d.id}" title="సవరించండి">
                 ✏️
@@ -403,30 +940,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       queueStatusBanner.classList.remove('active');
     } else if (action === 'download') {
       // Download MP3 of announcement
-      const script = tts.generateAnnouncementScript(donation);
-      btn.textContent = '⏳';
+      const origHtml = btn.innerHTML;
+      btn.classList.add('loading');
+      btn.innerHTML = `<span class="btn-icon">⏳</span> డౌన్‌లోడ్...`;
       try {
-        const res = await fetch('/api/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            text: script,
-            voice: tts.selectedVoice,
-            rate: tts.rate,
-            pitch: tts.pitch
-          })
-        });
-        const data = await res.json();
-        if (data.audioUrl) {
-          const a = document.createElement('a');
-          a.href = data.audioUrl;
-          a.download = `వినాయక_విరాళం_${donation.name.replace(/\s+/g, '_')}.mp3`;
-          a.click();
-        }
+        await tts.downloadDonationMp3(donation);
+        btn.innerHTML = `<span class="btn-icon">✓</span> సేవ్ అయింది`;
+        showToastNotification(`✅ '${donation.name}' గారి విరాళం MP3 విజయవంతంగా డౌన్‌లోడ్ అయింది!`);
       } catch (err) {
-        alert("ఆడియో డౌన్‌లోడ్ చేయడంలో సమస్య ఏర్పడింది.");
+        console.error("Donation MP3 download error:", err);
+        alert(`ఆడియో డౌన్‌లోడ్ చేయడంలో సమస్య ఏర్పడింది: ${err.message}\nదయచేసి సర్వర్ IP సరిగ్గా ఉందో లేదో తనిఖీ చేయండి.`);
       } finally {
-        btn.textContent = '⬇️';
+        setTimeout(() => {
+          btn.innerHTML = origHtml;
+          btn.classList.remove('loading');
+        }, 2500);
       }
     } else if (action === 'toggle-read') {
       store.toggleRead(id);
@@ -619,7 +1147,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       inputName, inputPlace, inputItem, inputItemQty, inputPurpose,
       inputCustomScript, inputMasterTemplate, searchInput,
       inputBulkPurpose, inputBulkPlace, inputBulkMatter,
-      bulkImportBatchMatter, bulkImportText
+      bulkImportBatchMatter, bulkImportText,
+      document.getElementById('input-custom-tts-text')
     ];
     translitInputs.forEach(inp => {
       if (inp) window.teluguTransliterate.attach(inp);
@@ -657,6 +1186,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     inputMasterTemplate.value = getMasterTemplate();
     updateMasterTemplatePreview();
     templateSettingsModal.classList.add('active');
+  });
+
+  // Download MP3 for this specific donation from modal
+  const btnModalDownloadMp3 = document.getElementById('btn-modal-download-mp3');
+  btnModalDownloadMp3?.addEventListener('click', async () => {
+    const script = inputCustomScript.value.trim();
+    if (!script) {
+      alert("డౌన్‌లోడ్ చేయడానికి మైక్ ప్రకటన పాఠం ఖాళీగా ఉంది.");
+      return;
+    }
+    const name = (inputName.value || 'భక్తుడు').trim().replace(/[\s\/\\]+/g, '_').replace(/[^\w\u0C00-\u0C7F_\-]/g, '');
+    const origHtml = btnModalDownloadMp3.innerHTML;
+    btnModalDownloadMp3.disabled = true;
+    btnModalDownloadMp3.innerHTML = `<span>⏳</span> డౌన్‌లోడ్ అవుతోంది...`;
+    try {
+      const filename = `వినాయక_విరాళం_${name}.mp3`;
+      await tts.downloadMp3(script, filename);
+      btnModalDownloadMp3.innerHTML = `<span>✓</span> సేవ్ అయింది!`;
+      showToastNotification(`✅ విరాళం మైక్ ఆడియో MP3 గా డౌన్‌లోడ్ అయింది!`);
+    } catch (err) {
+      alert(`ఆడియో డౌన్‌లోడ్ లోపం: ${err.message}`);
+    } finally {
+      setTimeout(() => {
+        btnModalDownloadMp3.innerHTML = origHtml;
+        btnModalDownloadMp3.disabled = false;
+      }, 2500);
+    }
   });
 
   btnCloseTemplateModal?.addEventListener('click', () => {
@@ -1046,6 +1602,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Remote Donations Arrived Listener (Toast Notification)
   let remoteToastTimer = null;
+
+  function showToastNotification(message) {
+    if (!remoteSyncToast) return;
+    if (remoteSyncToastText) {
+      remoteSyncToastText.textContent = message;
+    }
+    remoteSyncToast.classList.add('show');
+    if (remoteToastTimer) clearTimeout(remoteToastTimer);
+    remoteToastTimer = setTimeout(() => {
+      remoteSyncToast.classList.remove('show');
+    }, 4500);
+  }
+
   window.addEventListener('remote-donations-added', (e) => {
     const { count, donors } = e.detail || {};
     if (!remoteSyncToast || !count) return;
@@ -1054,15 +1623,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const sample = donors && donors[0];
     const sampleInfo = sample ? `${sample.name} (${sample.amount ? '₹' + sample.amount : sample.item})` : '';
-    if (remoteSyncToastText) {
-      remoteSyncToastText.textContent = `🔔 మరో ఫోన్ నుండి ${count} కొత్త విరాళం నమోదయింది: ${sampleInfo}`;
-    }
-    remoteSyncToast.classList.add('show');
-
-    if (remoteToastTimer) clearTimeout(remoteToastTimer);
-    remoteToastTimer = setTimeout(() => {
-      remoteSyncToast.classList.remove('show');
-    }, 4500);
+    showToastNotification(`🔔 మరో ఫోన్ నుండి ${count} కొత్త విరాళం నమోదయింది: ${sampleInfo}`);
   });
 
   // ==========================================================================
@@ -1188,6 +1749,44 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateBulkSelectionUI();
       alert(`${count} విరాళాలు విజయవంతంగా తొలగించబడ్డాయి.`);
     }
+  });
+
+  // Batch download MP3 for selected donations
+  const btnBulkDownloadMp3 = document.getElementById('btn-bulk-download-mp3');
+  btnBulkDownloadMp3?.addEventListener('click', async () => {
+    if (selectedDonorIds.size === 0) {
+      alert("దయచేసి ముందుగా విరాళాలను ఎంచుకోండి.");
+      return;
+    }
+    const donorList = store.donations.filter(d => selectedDonorIds.has(d.id));
+    if (donorList.length === 0) return;
+
+    if (!confirm(`ఎంపిక చేసిన ${donorList.length} విరాళాల ఆడియోలను వరుసగా MP3 గా డౌన్‌లోడ్ చేయాలా?`)) {
+      return;
+    }
+
+    const origText = btnBulkDownloadMp3.textContent;
+    btnBulkDownloadMp3.disabled = true;
+    let successCount = 0;
+
+    for (let i = 0; i < donorList.length; i++) {
+      const donor = donorList[i];
+      btnBulkDownloadMp3.textContent = `⏳ ${i + 1}/${donorList.length}...`;
+      try {
+        await tts.downloadDonationMp3(donor);
+        successCount++;
+        await new Promise(r => setTimeout(r, 600));
+      } catch (err) {
+        console.error(`Failed to download MP3 for ${donor.name}:`, err);
+      }
+    }
+
+    btnBulkDownloadMp3.textContent = `✓ ${successCount} పూర్తయ్యాయి!`;
+    showToastNotification(`✅ ${successCount} విరాళాల MP3 ఆడియోలు విజయవంతంగా డౌన్‌లోడ్ అయ్యాయి!`);
+    setTimeout(() => {
+      btnBulkDownloadMp3.textContent = origText;
+      btnBulkDownloadMp3.disabled = false;
+    }, 3000);
   });
 
   btnBulkCancel?.addEventListener('click', () => {
@@ -1487,11 +2086,36 @@ Kiran Kumar, Rajahmundry, 1000, పూజా సామాగ్రి`;
     alert(`విజయవంతంగా ${addedCount} విరాళాలు జోడించబడ్డాయి! 🙏`);
   });
 
-  // 9. Register Service Worker for PWA
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(err => {
+  // 9. Service Worker & Cache Management
+  var isNativeEnvironment = !!(window.Capacitor?.isNativePlatform?.() || window.AndroidNativeTTS || window.AndroidNativeDownloader || window.location.hostname === 'localhost' || window.location.protocol === 'file:');
+  if (isNativeEnvironment) {
+    // In native Android Capacitor app, unregister any service workers to guarantee local bundled APK assets are loaded
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        for (var r of regs) { r.unregister(); }
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (var n of names) { caches.delete(n); }
+      });
+    }
+  } else if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      reg.update();
+    }).catch(err => {
       console.log('Service Worker registration notice:', err);
     });
+    if ('caches' in window) {
+      caches.keys().then(keys => {
+        keys.forEach(k => {
+          if (k !== 'vinayaka-announcer-v3.1') {
+            console.log('Deleting outdated cache:', k);
+            caches.delete(k);
+          }
+        });
+      });
+    }
   }
 
   // Escape helper
@@ -1503,6 +2127,381 @@ Kiran Kumar, Rajahmundry, 1000, పూజా సామాగ్రి`;
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
   }
+
+  // ==========================================================================
+  // 11. Custom Telugu TTS Announcement Studio & MP3 Downloader
+  // ==========================================================================
+  const btnOpenCustomTts = document.getElementById('btn-open-custom-tts');
+  const btnToolbarCustomTts = document.getElementById('btn-toolbar-custom-tts');
+  const customTtsModal = document.getElementById('custom-tts-modal');
+  const btnCloseCustomTts = document.getElementById('btn-close-custom-tts');
+  const inputCustomTtsText = document.getElementById('input-custom-tts-text');
+  const btnStudioToggleTranslit = document.getElementById('btn-studio-toggle-translit');
+  const studioTranslitStatus = document.getElementById('studio-translit-status');
+
+  const ttsStatChars = document.getElementById('tts-stat-chars');
+  const ttsStatWords = document.getElementById('tts-stat-words');
+  const ttsStatDuration = document.getElementById('tts-stat-duration');
+  const btnTtsCopyText = document.getElementById('btn-tts-copy-text');
+  const btnTtsClearText = document.getElementById('btn-tts-clear-text');
+
+  const studioVoiceMohan = document.getElementById('studio-voice-mohan');
+  const studioVoiceShruti = document.getElementById('studio-voice-shruti');
+  const studioToggleBell = document.getElementById('studio-toggle-bell');
+  const studioToggleEcho = document.getElementById('studio-toggle-echo');
+  const studioToggleShankh = document.getElementById('studio-toggle-shankh');
+
+  const studioRateSlider = document.getElementById('studio-rate-slider');
+  const studioRateValue = document.getElementById('studio-rate-value');
+  const studioPitchSlider = document.getElementById('studio-pitch-slider');
+  const studioPitchValue = document.getElementById('studio-pitch-value');
+
+  const studioSpeakingBanner = document.getElementById('studio-speaking-banner');
+  const studioStatusText = document.getElementById('studio-status-text');
+  const btnStudioPlay = document.getElementById('btn-studio-play');
+  const btnStudioStop = document.getElementById('btn-studio-stop');
+  const btnStudioDownloadMp3 = document.getElementById('btn-studio-download-mp3');
+  const btnStudioSaveNotice = document.getElementById('btn-studio-save-notice');
+
+  // Preset announcement scripts
+  const TTS_PRESETS = {
+    puja: "శ్రీ వినాయక స్వామి వారి భక్తులందరికీ ముఖ్య గమనిక... నేడు సాయంత్రం 7:00 గంటలకు స్వామివారికి విశేష పంచామృతాభిషేకం, మహా మంగళ హారతి మరియు తీర్థ ప్రసాద వితరణ జరుగును. భక్తులందరూ సకుటుంబ సపరివార సమేతంగా విచ్చేసి స్వామివారి దివ్య తీర్థ ప్రసాదాలు స్వీకరించి కృపకు పాత్రులు కాగలరు. బోలో గణపతి బప్పా మోరియా!",
+    prasadam: "శ్రీ గణపతి భక్త మహాశయులకు విజ్ఞప్తి... రేపు మధ్యాహ్నం 12:30 గంటల నుండి మన గణపతి మండపం వద్ద స్వామివారి పవిత్ర అన్నప్రసాద వితరణ మరియు మహా అన్నదాన కార్యక్రమం ఏర్పాటు చేయబడింది. భక్తులందరూ పెద్ద సంఖ్యలో విచ్చేసి స్వామివారి మహా ప్రసాదాన్ని స్వీకరించవలసిందిగా కోరుచున్నాము. గణపతి మహారాజ్ కి జై!",
+    laddu: "సమస్త భక్తజనుల దృష్టికి... నేటి రాత్రి 8:30 గంటలకు శ్రీ వినాయక స్వామి వారి దివ్య ప్రసాదం మహా లడ్డూ వేలం పాట అత్యంత వైభవంగా నిర్వహించబడుతుంది. ఈ పవిత్ర లడ్డూ ప్రసాదాన్ని దక్కించుకోవాలనుకునే భక్తులు వెంటనే కమిటీ వద్ద పేర్లు నమోదు చేసుకొని, వేలం పాటలో పాల్గొనవలసిందిగా మనవి. గణపతి బప్పా మోరియా!",
+    cultural: "ఆధ్యాత్మిక భక్తులకు ఆహ్వానం... నేటి సాయంత్రం 6:30 గంటల నుండి మన మండపం వేదికపై ప్రముఖ కళాకారులచే భక్తి సంగీత విభావరి, భజన కీర్తనలు మరియు చిన్నారుల కోలాట నృత్య ప్రదర్శనలు జరుగును. భక్తులందరూ విచ్చేసి ఈ సాంస్కృతిక కార్యక్రమాలను తిలకించి ఆనందించగలరు.",
+    parking: "భక్తులకు ముఖ్య సూచన... మండపం పరిసరాల్లో రద్దీ దృష్ట్యా భక్తులందరూ తమ ద్విచక్ర మరియు నాలుగు చక్రాల వాహనాలను నిర్దేశించిన పార్కింగ్ స్థలంలోనే క్రమపద్ధతిలో నిలపవలసిందిగా మనవి. స్వామివారి దర్శనానికి క్యూ లైన్లలో ఓపికతో వేచి ఉండి కమిటీ వారికి సహకరించగలరు. ధన్యవాదాలు.",
+    nimajjanam: "గణపతి భక్తులందరి సమాచారం కొరకు... మన వినాయక స్వామి వారి నిమజ్జన మహోత్సవ శోభాయాత్ర రేపు ఉదయం 10:00 గంటలకు మండపం నుండి ప్రారంభమవుతుంది. డప్పు వాయిద్యాలు, కోలాటాలు, భజనల నడుమ సాగే ఈ దివ్య శోభాయాత్రలో యువత మరియు పెద్దలందరూ అధిక సంఖ్యలో పాల్గొని విజయవంతం చేయవలసిందిగా కోరుచున్నాము. బోలో గణపతి బప్పా మోరియా!",
+    wishes: "శ్రీ వినాయక చవితి నవరాత్రి మహోత్సవాల సందర్భంగా మన కాలనీ మరియు చుట్టుపక్కల ప్రాంతాల భక్తజనులందరికీ వినాయక ఉత్సవ కమిటీ తరఫున హృదయపూర్వక శుభాకాంక్షలు! విఘ్నేశ్వరుని దివ్య ఆశీస్సులతో మీ కుటుంబాలన్నీ ఆయురారోగ్యాలు, సుఖసంతోషాలు మరియు అష్టైశ్వర్యాలతో వర్ధిల్లాలని మనసారా ప్రార్థిస్తున్నాము. గణపతి మహారాజ్ కి జై!",
+    celeb_balayya: "జై బాలయ్య! దెబ్బకు దయ్యం వదలాలి... మైక్ మోత మోగిపోవాలి! సాక్షాత్తు ఆ వినాయక స్వామి వారి కృపాకటాక్షాలతో... మన గణపతి మండపం వద్ద భక్తజనులందరూ అత్యంత భక్తిశ్రద్ధలతో పూజలు సమర్పిస్తున్నారు. ఫ్లూట్ జింక ముందు ఊదు... సింహం ముందు కాదు! భక్తులందరూ గట్టిగా జై కొట్టండి... జై బాలయ్య! బోలో గణపతి బప్పా మోరియా!",
+    celeb_baahubali: "శ్రీ వినాయక మహారాజ్ దివ్య సమక్షంలో... మాహిష్మతీ సామ్రాజ్య భక్తితో చేయబడుతున్న ప్రకటన! అమరేంద్ర బాహుబలి అను నేను... స్వామివారి మండపానికి విచ్చేసిన సమస్త భక్తజనులకు ఆయురారోగ్య అష్టైశ్వర్యాలు కలగాలని, విఘ్నేశ్వరుని కృప సదా వర్ధిల్లాలని మనస్ఫూర్తిగా ప్రార్థిస్తున్నాను! జై గణపతి దేవా! జై బాహుబలి!",
+    celeb_pawankalyan: "భక్తజనులందరికీ నా హృదయపూర్వక నమస్కారాలు! మన వినాయక చవితి ఉత్సవాల సందర్భంగా యువత, పెద్దలు అందరూ కలిసికట్టుగా పందిరిని ఇంత అద్భుతంగా నిర్వహించడం నిజంగా గర్వకారణం. మనం చేసే ప్రతి మంచి పనిలో ఆ విఘ్నాధిపతి ఆశీస్సులు ఎల్లప్పుడూ ఉంటాయి. నిజాయితీగా ఉందాం... సమాజానికి సేవ చేద్దాం. జై హింద్! బోలో గణపతి బప్పా మోరియా!",
+    celeb_brahmanandam: "ఆహా... ఏమి భక్తి! ఏమి చందా! నేనండి మీ ఖాన్ దాదా... కాదు కాదు, మన వినాయక భక్తుడుని! ఇక్కడ లడ్డూ ప్రసాదం చూస్తుంటే నా కళ్ళలో ఆనందబాష్పాలు వచ్చేస్తున్నాయి. విరాళాలు ఇచ్చే భక్తులందరికీ స్వామివారు కోట్లకు కోట్లు సంపద ఇవ్వాలని ఆకాంక్షిస్తున్నాం... ఆనందో బ్రహ్మ! జై బోలో గణేష్ మహారాజ్ కి జై!"
+  };
+
+  function updateStudioStats() {
+    if (!inputCustomTtsText) return;
+    const text = inputCustomTtsText.value || '';
+    const charCount = text.length;
+    const words = text.trim() ? text.trim().split(/\s+/).filter(Boolean).length : 0;
+    const estSec = text.trim() ? Math.max(1, Math.round(text.trim().length / 15)) : 0;
+
+    if (ttsStatChars) ttsStatChars.textContent = charCount;
+    if (ttsStatWords) ttsStatWords.textContent = words;
+    if (ttsStatDuration) ttsStatDuration.textContent = `~${estSec} సెకన్లు`;
+  }
+
+  inputCustomTtsText?.addEventListener('input', updateStudioStats);
+
+  // Studio Voice / Persona Radio Listeners
+  const studioPersonaRadios = document.querySelectorAll('input[name="studioVoiceSelect"]');
+  const studioCelebBox = document.getElementById('studio-celeb-box');
+  const studioCelebTitle = document.getElementById('studio-celeb-title');
+  const btnStudioPlayCeleb = document.getElementById('btn-studio-play-celeb');
+  const studioToggleCelebIntro = document.getElementById('studio-toggle-celeb-intro');
+
+  studioPersonaRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (radio.checked && window.CELEBRITY_PERSONAS) {
+        const isCeleb = (radio.value !== 'mohan' && radio.value !== 'shruti');
+        const persona = window.CELEBRITY_PERSONAS[radio.value];
+        if (persona) {
+          const rateVal = parseInt(persona.rate) || 0;
+          const pitchVal = parseInt(persona.pitch) || 0;
+          if (studioRateSlider) {
+            studioRateSlider.value = rateVal;
+            if (studioRateValue) studioRateValue.textContent = (rateVal >= 0 ? '+' : '') + rateVal + '%';
+          }
+          if (studioPitchSlider) {
+            studioPitchSlider.value = pitchVal;
+            if (studioPitchValue) studioPitchValue.textContent = (pitchVal >= 0 ? '+' : '') + pitchVal + 'Hz';
+          }
+        }
+        if (studioCelebBox) {
+          if (isCeleb && persona) {
+            studioCelebBox.style.display = 'block';
+            if (studioCelebTitle) studioCelebTitle.textContent = `🎬 ${persona.name} వాయిస్ క్లిప్:`;
+          } else {
+            studioCelebBox.style.display = 'none';
+          }
+        }
+      }
+    });
+  });
+
+  btnStudioPlayCeleb?.addEventListener('click', async () => {
+    const selectedRadio = document.querySelector('input[name="studioVoiceSelect"]:checked');
+    const val = selectedRadio ? selectedRadio.value : 'balayya';
+    try {
+      btnStudioPlayCeleb.textContent = '⏹️ ఆగు...';
+      await tts.playCelebrityClip(val);
+    } catch (e) {
+      console.warn("Studio celeb play error:", e);
+    } finally {
+      btnStudioPlayCeleb.textContent = '▶️ డైలాగ్ వినండి';
+    }
+  });
+
+  // Preset chips click
+  document.querySelectorAll('.tts-preset-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const presetKey = chip.dataset.preset;
+      if (TTS_PRESETS[presetKey]) {
+        inputCustomTtsText.value = TTS_PRESETS[presetKey];
+        updateStudioStats();
+
+        // Auto-select persona if clicking celebrity chip
+        if (presetKey.startsWith('celeb_')) {
+          const personaKey = presetKey.replace('celeb_', '');
+          const targetRadio = document.querySelector(`input[name="studioVoiceSelect"][value="${personaKey}"]`);
+          if (targetRadio) {
+            targetRadio.checked = true;
+            targetRadio.dispatchEvent(new Event('change'));
+          }
+        }
+        inputCustomTtsText.focus();
+      }
+    });
+  });
+
+  // Transliteration studio toggle
+  btnStudioToggleTranslit?.addEventListener('click', () => {
+    if (!window.teluguTransliterate) return;
+    window.teluguTransliterate.enabled = !window.teluguTransliterate.enabled;
+    const isOn = window.teluguTransliterate.enabled;
+    if (studioTranslitStatus) {
+      studioTranslitStatus.textContent = isOn ? 'ON' : 'OFF';
+      studioTranslitStatus.style.color = isOn ? '#00E676' : '#BCAAA4';
+    }
+    if (translitStatus) {
+      translitStatus.textContent = isOn ? 'ON' : 'OFF';
+      translitStatus.style.color = isOn ? '#00E676' : '#BCAAA4';
+    }
+  });
+
+  // Sliders input
+  studioRateSlider?.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value);
+    if (studioRateValue) studioRateValue.textContent = (val >= 0 ? '+' : '') + val + '%';
+  });
+
+  studioPitchSlider?.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value);
+    if (studioPitchValue) studioPitchValue.textContent = (val >= 0 ? '+' : '') + val + 'Hz';
+  });
+
+  // Open & Close Modal
+  function openCustomTtsModal() {
+    if (!inputCustomTtsText.value.trim()) {
+      inputCustomTtsText.value = TTS_PRESETS.puja;
+    }
+    updateStudioStats();
+    customTtsModal.classList.add('active');
+  }
+
+  const btnBannerOpenTts = document.getElementById('btn-banner-open-tts');
+  const bannerOpenTtsStudio = document.getElementById('banner-open-tts-studio');
+
+  btnOpenCustomTts?.addEventListener('click', openCustomTtsModal);
+  btnToolbarCustomTts?.addEventListener('click', openCustomTtsModal);
+  btnBannerOpenTts?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openCustomTtsModal();
+  });
+  bannerOpenTtsStudio?.addEventListener('click', openCustomTtsModal);
+  btnCloseCustomTts?.addEventListener('click', () => {
+    tts.stop();
+    setStudioPlayingState(false);
+    customTtsModal.classList.remove('active');
+  });
+
+  // Copy & Clear
+  btnTtsCopyText?.addEventListener('click', async () => {
+    const text = inputCustomTtsText.value;
+    if (!text.trim()) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      showToastNotification("📋 పాఠం కాపీ అయింది!");
+    } catch (e) {
+      inputCustomTtsText.select();
+      document.execCommand('copy');
+      showToastNotification("📋 పాఠం కాపీ అయింది!");
+    }
+  });
+
+  btnTtsClearText?.addEventListener('click', () => {
+    if (confirm("ప్రకటన పాఠాన్ని క్లియర్ చేయాలా?")) {
+      inputCustomTtsText.value = '';
+      updateStudioStats();
+    }
+  });
+
+  function setStudioPlayingState(isPlaying, statusMsg = "మైక్ ప్రకటన ప్లే అవుతోంది...") {
+    if (!btnStudioPlay || !btnStudioStop || !studioSpeakingBanner) return;
+    if (isPlaying) {
+      btnStudioPlay.style.display = 'none';
+      btnStudioStop.style.display = 'inline-flex';
+      studioSpeakingBanner.style.display = 'flex';
+      if (studioStatusText) studioStatusText.textContent = statusMsg;
+    } else {
+      btnStudioPlay.style.display = 'inline-flex';
+      btnStudioStop.style.display = 'none';
+      studioSpeakingBanner.style.display = 'none';
+    }
+  }
+
+  function getStudioVoiceSettings() {
+    const selectedRadio = document.querySelector('input[name="studioVoiceSelect"]:checked');
+    const personaKey = selectedRadio ? selectedRadio.value : 'mohan';
+    const persona = window.CELEBRITY_PERSONAS ? window.CELEBRITY_PERSONAS[personaKey] : null;
+    const voice = persona ? persona.voice : 'te-IN-MohanNeural';
+
+    const rateVal = studioRateSlider ? parseInt(studioRateSlider.value) || 0 : 0;
+    const rate = (rateVal >= 0 ? '+' : '') + rateVal + '%';
+    const pitchVal = studioPitchSlider ? parseInt(studioPitchSlider.value) || 0 : 0;
+    const pitch = (pitchVal >= 0 ? '+' : '') + pitchVal + 'Hz';
+    const withBell = studioToggleBell ? studioToggleBell.checked : true;
+    const withShankh = studioToggleShankh ? studioToggleShankh.checked : false;
+    const withEcho = studioToggleEcho ? studioToggleEcho.checked : true;
+
+    // Celebrity punch dialogue intro clip
+    const isCeleb = (personaKey !== 'mohan' && personaKey !== 'shruti');
+    const withCelebIntro = isCeleb && (studioToggleCelebIntro ? studioToggleCelebIntro.checked : true);
+    const celebIntro = withCelebIntro ? personaKey : null;
+
+    return { voice, personaKey, rate, pitch, withBell, withShankh, withEcho, celebIntro };
+  }
+
+  // Play announcement
+  btnStudioPlay?.addEventListener('click', async () => {
+    let text = inputCustomTtsText.value.trim();
+    if (!text) {
+      alert("దయచేసి ప్రకటించడానికి ముందుగా ఏదైనా తెలుగు టెక్స్ట్ నమోదు చేయండి.");
+      inputCustomTtsText.focus();
+      return;
+    }
+
+    // If English text exists and transliteration enabled, auto-convert before speaking
+    if (window.teluguTransliterate && window.teluguTransliterate.enabled && /[a-zA-Z]/.test(text)) {
+      text = await window.teluguTransliterate.transliterateSentence(text);
+      inputCustomTtsText.value = text;
+      updateStudioStats();
+    }
+
+    const settings = getStudioVoiceSettings();
+    setStudioPlayingState(true, "మైక్ ప్రకటన ప్రారంభమవుతోంది...");
+
+    // Configure pandal audio echo
+    if (window.pandalAudio) {
+      window.pandalAudio.echoEnabled = settings.withEcho;
+    }
+
+    // Apply voice to TTS
+    tts.selectedVoice = settings.voice;
+    tts.rate = settings.rate;
+    tts.pitch = settings.pitch;
+
+    tts.onEndCallback = () => {
+      setStudioPlayingState(false);
+    };
+
+    const isCeleb = (settings.personaKey !== 'mohan' && settings.personaKey !== 'shruti');
+
+    try {
+      await tts.speak(text, {
+        withBell: settings.withBell,
+        withShankh: settings.withShankh,
+        celebIntro: settings.celebIntro,
+        celebId: isCeleb ? settings.personaKey : null,
+        useClone: isCeleb
+      });
+    } catch (e) {
+      console.warn("Studio speak error:", e);
+    } finally {
+      setStudioPlayingState(false);
+    }
+  });
+
+  btnStudioStop?.addEventListener('click', () => {
+    tts.stop();
+    setStudioPlayingState(false);
+  });
+
+  // Download as MP3
+  btnStudioDownloadMp3?.addEventListener('click', async () => {
+    let text = inputCustomTtsText.value.trim();
+    if (!text) {
+      alert("దయచేసి MP3 డౌన్‌లోడ్ చేయడానికి ముందుగా ఏదైనా తెలుగు టెక్స్ట్ నమోదు చేయండి.");
+      inputCustomTtsText.focus();
+      return;
+    }
+
+    // Auto-transliterate English if needed
+    if (window.teluguTransliterate && window.teluguTransliterate.enabled && /[a-zA-Z]/.test(text)) {
+      text = await window.teluguTransliterate.transliterateSentence(text);
+      inputCustomTtsText.value = text;
+      updateStudioStats();
+    }
+
+    const settings = getStudioVoiceSettings();
+    const origHtml = btnStudioDownloadMp3.innerHTML;
+    btnStudioDownloadMp3.disabled = true;
+    btnStudioDownloadMp3.innerHTML = `<span>⏳</span> MP3 తయారవుతోంది...`;
+
+    try {
+      // Smart filename from preview words
+      const previewWords = text.replace(/[^\w\u0C00-\u0C7F\s]/g, '').trim().split(/\s+/).slice(0, 3).join('_');
+      const filename = `వినాయక_ప్రకటన_${previewWords || 'Custom_TTS'}.mp3`;
+
+      await tts.downloadMp3(text, filename, {
+        voice: settings.voice,
+        rate: settings.rate,
+        pitch: settings.pitch,
+        celebIntro: settings.celebIntro,
+        celebId: isCeleb ? settings.personaKey : null,
+        useClone: isCeleb
+      });
+
+      btnStudioDownloadMp3.innerHTML = `<span>✓</span> డౌన్‌లోడ్ పూర్తయింది!`;
+      showToastNotification(`✅ MP3 విజయవంతంగా డౌన్‌లోడ్ అయింది! (${filename})`);
+    } catch (err) {
+      console.error("Studio MP3 download error:", err);
+      alert(`MP3 డౌన్‌లోడ్ చేయడంలో సమస్య ఏర్పడింది: ${err.message}\nసర్వర్ అందుబాటులో ఉందో లేదో తనిఖీ చేయండి.`);
+    } finally {
+      setTimeout(() => {
+        btnStudioDownloadMp3.innerHTML = origHtml;
+        btnStudioDownloadMp3.disabled = false;
+      }, 2500);
+    }
+  });
+
+  // Save as Notice Card in pandal donations list
+  btnStudioSaveNotice?.addEventListener('click', () => {
+    const text = inputCustomTtsText.value.trim();
+    if (!text) {
+      alert("భద్రపరచడానికి ప్రకటన పాఠం ఖాళీగా ఉంది.");
+      return;
+    }
+
+    const firstLine = text.split('\n')[0].slice(0, 45);
+    const noticeItem = {
+      id: 'dev_' + Date.now(),
+      name: '📢 పందిరి ముఖ్య ప్రకటన (Notice)',
+      place: 'మండప మైక్',
+      gothram: '',
+      type: 'item',
+      amount: 0,
+      item: firstLine || 'ముఖ్య సమాచారం',
+      itemQty: '',
+      purpose: 'భక్తులకు ముఖ్య సమాచారం',
+      customScript: text,
+      isRead: false,
+      createdAt: new Date().toISOString()
+    };
+
+    store.add(noticeItem);
+    showToastNotification("✅ ప్రత్యేక ప్రకటన విరాళాల జాబితాలో భద్రపరచబడింది!");
+    customTtsModal.classList.remove('active');
+  });
 
   // 10. Startup Splash Screen & Time Optimizer
   const startupSplash = document.getElementById('startup-splash');
@@ -1529,13 +2528,18 @@ Kiran Kumar, Rajahmundry, 1000, పూజా సామాగ్రి`;
     setTimeout(() => { startupProgressBar.style.width = '100%'; }, 500);
   }
 
+  // Guarantee splash dismisses within 1.2s max on mobile
+  setTimeout(dismissSplash, 1200);
+
   // Load initial data (instant local cache + background server sync)
-  await store.load();
+  try {
+    await store.load();
+  } catch (err) {
+    console.warn("Initial store load notice:", err);
+  }
 
   if (startupStatusText) {
     startupStatusText.textContent = 'సర్వం సిద్ధం! స్వాగతం... 🙏';
   }
-
-  // Smoothly fade out after 1.1s for a majestic first impression
-  setTimeout(dismissSplash, 1100);
+  dismissSplash();
 });
