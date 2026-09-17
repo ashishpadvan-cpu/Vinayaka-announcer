@@ -392,13 +392,57 @@ class TeluguTTSAnnouncer {
 
     if (this.onStartCallback) this.onStartCallback(text);
 
-    // Play Temple Bell chime or Shankham first if enabled
+    // 1. Dispatch Neural TTS fetch immediately in parallel with intro bell
+    const serverUrl = this.getServerBaseUrl();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s timeout
+
+    const isCeleb = (this.selectedPersona !== 'mohan' && this.selectedPersona !== 'shruti');
+    const celebIntro = options.celebIntro !== undefined
+      ? options.celebIntro
+      : (this.includeCelebrityDialogues && isCeleb ? this.selectedPersona : null);
+
+    const useClone = options.useClone !== undefined
+      ? options.useClone
+      : (this.useVoiceClone && isCeleb);
+
+    const celebId = options.celebId || (isCeleb ? this.selectedPersona : null);
+
+    const ttsFetchPromise = fetch(`${serverUrl}/api/tts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        text: text,
+        voice: options.voice || this.selectedVoice,
+        rate: options.rate !== undefined ? options.rate : this.rate,
+        pitch: options.pitch !== undefined ? options.pitch : this.pitch,
+        celebIntro: celebIntro,
+        useClone: useClone,
+        celebId: celebId
+      })
+    }).then(async (res) => {
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        return data.audioUrl ? (data.audioUrl.startsWith('http') ? data.audioUrl : `${serverUrl}${data.audioUrl}`) : null;
+      }
+      return null;
+    }).catch(err => {
+      clearTimeout(timeoutId);
+      console.warn("Neural TTS server unreachable or timed out:", err.message);
+      return null;
+    });
+
+    // 2. Play Temple Bell chime or Shankham in parallel (Zero Dead Silence)
     if (options.withShankh && window.pandalAudio) {
       window.pandalAudio.playShankham();
-      await new Promise(r => setTimeout(r, 2200));
+      await new Promise(r => setTimeout(r, 1200));
     } else if (options.withBell && window.pandalAudio) {
       window.pandalAudio.playTempleBell();
-      await new Promise(r => setTimeout(r, 1200));
+      // Strike occurs instantly (0-300ms); waiting only 350ms lets speech start seamlessly
+      // right as the bell resonates into its warm brass decay, with ZERO awkward gap!
+      await new Promise(r => setTimeout(r, 350));
     }
 
     // Duck background music
@@ -408,49 +452,15 @@ class TeluguTTSAnnouncer {
 
     let playedSuccessfully = false;
 
-    // 1. Attempt Server-side Neural TTS (with ElevenLabs AI Voice Clone support)
+    // 3. Await pre-fetched TTS audio URL
     try {
-      const serverUrl = this.getServerBaseUrl();
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s timeout for high quality AI voice synthesis
-
-      const isCeleb = (this.selectedPersona !== 'mohan' && this.selectedPersona !== 'shruti');
-      const celebIntro = options.celebIntro !== undefined
-        ? options.celebIntro
-        : (this.includeCelebrityDialogues && isCeleb ? this.selectedPersona : null);
-
-      const useClone = options.useClone !== undefined
-        ? options.useClone
-        : (this.useVoiceClone && isCeleb);
-
-      const celebId = options.celebId || (isCeleb ? this.selectedPersona : null);
-
-      const res = await fetch(`${serverUrl}/api/tts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          text: text,
-          voice: options.voice || this.selectedVoice,
-          rate: options.rate !== undefined ? options.rate : this.rate,
-          pitch: options.pitch !== undefined ? options.pitch : this.pitch,
-          celebIntro: celebIntro,
-          useClone: useClone,
-          celebId: celebId
-        })
-      });
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.audioUrl) {
-          const fullAudioUrl = data.audioUrl.startsWith('http') ? data.audioUrl : `${serverUrl}${data.audioUrl}`;
-          await this.playAudioUrl(fullAudioUrl);
-          playedSuccessfully = true;
-        }
+      const fullAudioUrl = await ttsFetchPromise;
+      if (fullAudioUrl && this.isPlaying) {
+        await this.playAudioUrl(fullAudioUrl);
+        playedSuccessfully = true;
       }
     } catch (err) {
-      console.warn("Neural TTS server unreachable or timed out:", err.message);
+      console.warn("Audio playback error:", err);
     }
 
     // 2. If Neural TTS server was unreachable, use Native Android TTS
