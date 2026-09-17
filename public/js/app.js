@@ -2368,7 +2368,7 @@ Kiran Kumar, Rajahmundry, 1000, పూజా సామాగ్రి`;
     const withCelebIntro = isCeleb && (studioToggleCelebIntro ? studioToggleCelebIntro.checked : true);
     const celebIntro = withCelebIntro ? personaKey : null;
 
-    return { voice, personaKey, rate, pitch, withBell, withShankh, withEcho, celebIntro };
+    return { voice, personaKey, rate, pitch, withBell, withShankh, withEcho, celebIntro, isCeleb };
   }
 
   // Play announcement
@@ -2404,7 +2404,7 @@ Kiran Kumar, Rajahmundry, 1000, పూజా సామాగ్రి`;
       setStudioPlayingState(false);
     };
 
-    const isCeleb = (settings.personaKey !== 'mohan' && settings.personaKey !== 'shruti');
+    const isCeleb = settings.isCeleb;
 
     try {
       await tts.speak(text, {
@@ -2443,6 +2443,7 @@ Kiran Kumar, Rajahmundry, 1000, పూజా సామాగ్రి`;
     }
 
     const settings = getStudioVoiceSettings();
+    const isCeleb = settings.isCeleb;
     const origHtml = btnStudioDownloadMp3.innerHTML;
     btnStudioDownloadMp3.disabled = true;
     btnStudioDownloadMp3.innerHTML = `<span>⏳</span> MP3 తయారవుతోంది...`;
